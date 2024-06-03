@@ -68,11 +68,11 @@ V 0051 Champs Élysées, Clémenceau ;13 ;False 0
 V 0052 Chardon Lagâche ;10 ;False 0
 V 0053 Charenton-Écoles ;8 ;False 0
 V 0054 Charles Michels ;10 ;False 0
-V 0055 Charles de Gaulle, Étoile ;1 ;False  0
+V 0055 Charles de Gaulle, Étoile ;1 ;False 0
 V 0056 Charles de Gaulle, Étoile ;2 ;False 0
 V 0057 Charles de Gaulle, Étoile ;6 ;True 0
 V 0058 Charonne ;9 ;False 0
-V 0059 Chaussée d'Antin, La Fayette ;7 ;False  0
+V 0059 Chaussée d'Antin, La Fayette ;7 ;False 0
 V 0060 Chaussée d'Antin, La Fayette ;9 ;False 0
 V 0061 Chemin Vert ;8 ;False 0
 V 0062 Chevaleret ;6 ;False 0
@@ -222,7 +222,7 @@ V 0205 Montgallet ;8 ;False 0
 V 0206 Montparnasse Bienvenue ;12 ;False 0
 V 0207 Montparnasse Bienvenue ;13 ;False 0
 V 0208 Montparnasse Bienvenue ;4 ;False 0
-V 0209 Montparnasse Bienvenue ;6 ;False  0
+V 0209 Montparnasse Bienvenue ;6 ;False 0
 V 0210 Mouton-Duvernet ;4 ;False 0
 V 0211 Ménilmontant ;2 ;False 0
 V 0212 Nation ;1 ;False 0
@@ -365,7 +365,7 @@ V 0348 Sèvres Lecourbe ;6 ;False 0
 V 0349 Ségur ;10 ;False 0
 V 0350 Temple ;3 ;False 0
 V 0351 Ternes ;2 ;False 0
-V 0352 Tolbiac ;7 ;False  0
+V 0352 Tolbiac ;7 ;False 0
 V 0353 Trinité d'Estienne d'Orves ;12 ;False 0
 V 0354 Trocadéro ;6 ;False 0
 V 0355 Trocadéro ;9 ;False 0
