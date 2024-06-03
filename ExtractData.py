@@ -9,7 +9,7 @@
 import networkx as nx
 def dataversion1():
     print("Data version 1")
-    file = open("Version1/metro.txt", "r")
+    file = open("Version1/metro.txt", "r", encoding ='utf-8')
     # start at line 15
     for i in range(15):
         file.readline()
@@ -26,15 +26,20 @@ def dataversion1():
             name_stop = ' '.join(name_stop)
             G.add_node(int(line[0].split(" ")[0]),name=name_stop,ligne=str(line[1]).strip(),if_terminus=bool(line[2].split(" ")[0].strip()),branchement=int(line[2].split(" ")[1]))
 
-    # Create all the edges
-    for line in file:
+        # Create all the edges
         if line[0] == 'E':
             line = line.split()
             G.add_edge(int(line[1]), int(line[2]), duration=int(line[3]))
+
 
     return G
 
 G = dataversion1()
 for i in G.nodes:
     print(G.nodes[i])
+
+#Display the "station 1 -> station 2 duration : " for each edge
+for edge in G.edges:
+    print("station",G.nodes[edge[0]]['name'],"-> station",G.nodes[edge[1]]['name'],"duration :",G.edges[edge]['duration'])
+
 
