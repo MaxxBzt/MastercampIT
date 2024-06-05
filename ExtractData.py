@@ -7,6 +7,11 @@
 # E num_sommet1 num_sommet2 temps_en_secondes
 
 import networkx as nx
+from matplotlib import pyplot as plt
+
+from checkgraph import *
+
+
 def dataversion1():
     print("Data version 1")
     file = open("Version1/metro.txt", "r", encoding ='utf-8')
@@ -36,10 +41,55 @@ def dataversion1():
 
 G = dataversion1()
 for i in G.nodes:
-    print(G.nodes[i])
+    #print(G.nodes[i])
+    pass
 
 #Display the "station 1 -> station 2 duration : " for each edge
 for edge in G.edges:
-    print("station",G.nodes[edge[0]]['name'],"-> station",G.nodes[edge[1]]['name'],"duration :",G.edges[edge]['duration'])
+    #print("station",G.nodes[edge[0]]['name'],"-> station",G.nodes[edge[1]]['name'],"duration :",G.edges[edge]['duration'])
+    pass
 
+# Create a dictionary mapping line numbers to colors
+line_colors = {
+    '1': 'blue',
+    '2': 'red',
+    '3': 'green',
+    '4': 'purple',
+    '5': 'orange',
+    '6': 'brown',
+    '7': 'pink',
+    '8': 'gray',
+    '9': 'olive',
+    '10': 'cyan',
+    '11': 'magenta',
+    '12': 'yellow',
+    '13': 'black',
+    '14': 'lime',
+}
+
+# Initialize an empty list for edge colors
+edge_colors = []
+
+# Iterate over each edge in the graph
+for edge in G.edges:
+    # Get the line attribute of the first node of the edge
+    line = G.nodes[edge[0]]['ligne']
+    # Use the line attribute to look up the corresponding color in the dictionary
+    color = line_colors.get(line, 'black')  # Default to black if line number is not in the dictionary
+    # Append the color to the edge colors list
+    edge_colors.append(color)
+
+# Draw the graph with edge colors
+nx.draw(G, with_labels=False, node_size=100, edge_color=edge_colors)
+plt.show()
+
+# check if the graph is connected
+IfGraphConnect(G)
+
+# Find the ACPM of the graph
+ACPM = findACPM(G)
+print("The ACPM of the graph is:")
+print(ACPM.edges)
+nx.draw(ACPM, with_labels=False, node_size=100, edge_color=edge_colors)
+plt.show()
 
