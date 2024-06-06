@@ -1,3 +1,4 @@
+from shortestpath import *
 
 # # format pour les sommets :
 # V num_sommet nom_sommet numéro_ligne si_terminus branchement (0 stations en commun, 1 pour la direction 1,  2 pour la direction 2, ainsi
@@ -36,9 +37,53 @@ def dataversion1():
             line = line.split()
             G.add_edge(int(line[1]), int(line[2]), duration=int(line[3]))
 
+    print(G)
+    print(G.nodes)
+    print(G.edges)
 
     return G
 
+
+def dataversion2():
+    # First we determine the RATP Agency thanks to agency.txt
+    ratp = "IDFM:Operator_100"
+
+    # We determine all the lines metro operated by the RATP thanks to routes.txt
+    # Reminders : it's metro if the route_type is 1
+    file = open("Version2_Version3/data/routes.txt", "r")
+    metro_lines = {}
+    # We don't take in consideration the first line
+
+    for line in file:
+        line = line.split(",")
+        if ratp in line and line[5] == "1":
+            metro_lines[line[0]] = line[2]
+
+
+    print("Data version 2")
+    print("Lines operated by the RATP :")
+    print(metro_lines)
+
+    # Now we can add the edges for each route in trip.txt
+    file = open("Version2_Version3/data/trips.txt", "r")
+    # We don't take in consideration the first line
+    for i in range(1):
+        file.readline()
+    # Create all the nodes
+    G = nx.Graph()
+
+
+
+dataversion1()
+test = dijkstra(dataversion1(), 1,25)
+print(test)
+print("The shortest path is:")
+print(test[0])
+print("The duration of the shortest path is:")
+# Convertir secondes en minutes
+print(test[1]//60,"minutes",test[1]%60,"secondes")
+
+'''
 G = dataversion1()
 for i in G.nodes:
     #print(G.nodes[i])
@@ -92,4 +137,4 @@ print("The ACPM of the graph is:")
 print(ACPM.edges)
 nx.draw(ACPM, with_labels=False, node_size=100, edge_color=edge_colors)
 plt.show()
-
+'''
