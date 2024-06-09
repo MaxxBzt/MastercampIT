@@ -1,8 +1,16 @@
-import matplotlib.pyplot as plt
+import tkinter as tk
+from Interface import MetroAppUI
+
+metro_image_path = "/Users/nolwen/Documents/GitHub/MastercampIT/Version1/metrof_r.png"
+
+root = tk.Tk()
+app = MetroAppUI(master=root, image_path=metro_image_path)
+app.mainloop()
 
 
 print("Hello world")
 import networkx as nx
+
 G = nx.Graph()
 
 G.add_node(1,name="Abesses",ligne=12,if_terminus=False,branchement=0)
