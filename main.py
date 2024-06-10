@@ -1,6 +1,16 @@
 import matplotlib.pyplot as plt
 import customtkinter as ctk
 
+import tkinter as tk
+from Interface import MetroAppUI
+
+metro_image_path = "Version1/metrof_r.png"
+
+file_path = 'Version1/pospoints.txt'
+
+root = tk.Tk()
+app = MetroAppUI(master=root, image_path=metro_image_path, points_txt= file_path)
+app.mainloop()
 
 print("Hello world")
 import networkx as nx

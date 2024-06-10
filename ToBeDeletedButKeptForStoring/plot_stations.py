@@ -3,9 +3,15 @@ from PIL import Image, ImageDraw
 import os
 
 
+<<<<<<< HEAD:plot_stations.py
 file_path = 'Version1/pospoints.txt'
+=======
+file_path = '../Version1/pospoints.txt'
 
-version1_path = os.path.join(os.getcwd(), 'Version1')
+version1_path = os.path.join(os.getcwd(), '../Version1')
+
+>>>>>>> origin/main:ToBeDeletedButKeptForStoring/plot_stations.py
+
 if os.path.isdir(version1_path):
     print("Contents of Version1 directory:", os.listdir(version1_path))
 else:
@@ -21,7 +27,7 @@ else:
     print("First 5 rows of the DataFrame:")
     print(data.head())
 
-    map_image_path = 'paris_map.png.jpg'  
+    map_image_path = '../paris_map.png.jpg'
     if not os.path.isfile(map_image_path):
         print(f"L'image de la carte {map_image_path} n'a pas été trouvée. Vérifiez le chemin de l'image.")
     else:
