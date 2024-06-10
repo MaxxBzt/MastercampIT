@@ -97,7 +97,7 @@ class MetroAppUI(tk.Frame):
             # We really draw points
             self.canvas.create_oval(
                 new_x - 5, new_y - 5, new_x + 5, new_y + 5,
-                fill='blue', outline='blue'
+                fill='white', outline='black'
             )
 
     def create_quit_button(self):
