@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw
 import os
 
 
-file_path = 'Version1\pospoints.txt'
+file_path = 'Version1/pospoints.txt'
 
 version1_path = os.path.join(os.getcwd(), 'Version1')
 if os.path.isdir(version1_path):
