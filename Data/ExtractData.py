@@ -88,11 +88,49 @@ def dataversion2():
     print(directions)
 
     # Now we determine the stops for all lines
-    stops = {}
+    G = nx.Graph()
+    stop_times_file = open("../Version2_Version3/data/stop_times_filtered.txt", "r")
+    # We just put the stops that are in the stop_times.txt
+    for stops_time in stop_times_file:
+        # we dont take the first line
+        stops_time = stops_time.split(",")
+        if stops_time[0] == "stop_id":
+            pass
+        else:
+            if stops_time[3] not in G.nodes:
+                stop = searchstop(stops_time[3])
+                if stop is not None:
+                    G.add_node(stop[0], name=stop[2], wheelchair =stop[12])
 
-    # Thanks to stop_times_filtered.txt we determine the stops for all lines and their duration
-    # To do so, we have for each trip_id the stops and at what time the metro stops at each stop
-    file = open("../Version2_Version3/data/stop_times_filtered.txt", "r")
+    stop_times_file.close()
+    print(G.nodes)
+    # print all stops like this :
+    # id_stop : name_stop, wheelchair (2 if false, 1 if true, 0 if unknown)
+
+    for stop in G.nodes:
+        print(stop, ":", G.nodes[stop]['name'], ", wheelchair :", G.nodes[stop]['wheelchair'])
+
+    # Now we determine the edges for all lines
+    stop_times_file = open("../Version2_Version3/data/stop_times_filtered.txt", "r")
+    for stops_time in stop_times_file:
+        # we dont take the first line
+        stops_time = stops_time.split(",")
+        if stops_time[0] == "trip_id":
+            pass
+        else:
+            G.add_node(stops_time[3], name=stops_time[3])
+
+def searchstop(stop_id):
+    stops_file = open("../Version2_Version3/data/stops.txt", "r")
+    for stops in stops_file:
+        stops = stops.split(",")
+        if stops[0] == stop_id:
+            stops_file.close()
+            return stops
+    stops_file.close()
+    return None
+
+
 
 
 
