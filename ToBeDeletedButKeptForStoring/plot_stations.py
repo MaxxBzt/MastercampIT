@@ -3,14 +3,12 @@ from PIL import Image, ImageDraw
 import os
 
 
-<<<<<<< HEAD:plot_stations.py
+
 file_path = 'Version1/pospoints.txt'
-=======
-file_path = '../Version1/pospoints.txt'
+
 
 version1_path = os.path.join(os.getcwd(), '../Version1')
 
->>>>>>> origin/main:ToBeDeletedButKeptForStoring/plot_stations.py
 
 if os.path.isdir(version1_path):
     print("Contents of Version1 directory:", os.listdir(version1_path))

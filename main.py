@@ -1,9 +1,7 @@
-import matplotlib.pyplot as plt
-import customtkinter as ctk
 import networkx as nx
 import tkinter as tk
-from Interface import MetroAppUI
-from ExtractData import dataversion1
+from UI.Interface import MetroAppUI
+from Data.ExtractData import dataversion1
 
 metro_image_path = "Version1/metrof_r.png"
 file_path = 'Version1/pospoints.txt'
