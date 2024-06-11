@@ -124,6 +124,9 @@ def dataversion2():
     for node in G.nodes:
         print(G.nodes[node])
 
+    for edges in G.edges:
+        print(G.edges[edges])
+
 
     # We are going to add the transfers
     # We determine the transfers thanks to transfers.txt
@@ -134,10 +137,8 @@ def dataversion2():
         line = line.split(",")
         # Compare the stop_id with the nodes of the graph
         if line[0] in G.nodes and line[1] in G.nodes:
-            duration = int(line[3])
-            if duration >=60:
-                duration = duration/60
-
+            duration = int(line[3]) # en seconde
+            round(duration,2)
             if not G.has_edge(line[0], line[1]) and not G.has_edge(line[1], line[0]):
                 # Create the new edges with the transfer
                 G.add_edge(line[0], line[1], name="transfer", duration=duration)
@@ -150,7 +151,15 @@ def dataversion2():
     for node in G.nodes:
         print(node,G.nodes[node])
 
+    for edges in G.edges:
+        print(G.edges[edges])
+
     print(G.is_directed()) # juste pour vérifier que le graphe est bien non orienté
+
+    connected = IfGraphConnect(G)
+    print(connected)
+
+    return G
 
 
 def searchstop(stop_id):
@@ -184,7 +193,7 @@ def time_difference(time1, time2):
     if time < 0:
         time = time *-1
 
-    return time/60
+    return round(time) # en secondes
 
 
 
