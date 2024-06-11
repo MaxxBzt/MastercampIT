@@ -8,6 +8,7 @@ from Graph.shortestpath import *
 # E num_sommet1 num_sommet2 temps_en_secondes
 
 from Graph.checkgraph import *
+from matplotlib import pyplot as plt
 
 
 def dataversion1():
@@ -68,7 +69,7 @@ def dataversion2():
     directions = {}
 
     # We determine the directions for all lines thanks to trips_filtered.txt
-    file = open("../Version2_Version3/data/trip_id_filtered.txt", "r")
+    file = open("../Version2_Version3/data/trip_id_filtered.txt", "r", encoding="utf-8")
 
     # For each trip_id of the text trip_id_filtered.txt we determine the direction
     for line in file:
@@ -85,40 +86,72 @@ def dataversion2():
                 if not any(item[0] == line[3] for item in directions[value]):
                     directions[value].append([line[3], line[2]])
 
-    print(directions)
 
-    # Now we determine the stops for all lines
+    stops = {} # { 1 : [[stop_id, stop_name, line, time, wheelchair],[stop_id, stop_name, line, time, wheelchair]], 2 : [[stop_id, stop_name, line, time, wheelchair],[stop_id, stop_name, line, time, wheelchair]]}
+
+    # we will determine all the stops in the order of the line for each line with the time of the arrival in the stops, according to the trip found in the direction dictionary
+    file = open("../Version2_Version3/data/stop_times_filtered.txt", "r", encoding="utf-8")
+
+    # TODO : add the trip id to the stops
+    for line in file:
+        line = line.split(",")
+        if get_key_from_value(line, directions):
+            key = get_key_from_value(line, directions)
+            stop_name = searchstop(line[3])
+            if key not in stops:
+                stops[key] = [[line[3], stop_name[2], key, line[1], stop_name[12]]] # [stop_id, stop_name, line, time, wheelchair]
+            else:
+                # Check if stop_name is not already in the list for the key
+                if not any(item[1] == stop_name[2] for item in stops[key]):
+                    stops[key].append([line[3], stop_name[2], key, line[1], stop_name[12]]) # [stop_id, stop_name, line, time, wheelchair]
+
+    file.close()
+    print(stops)
+
+    # Create all the nodes and edges
     G = nx.Graph()
-    stop_times_file = open("../Version2_Version3/data/stop_times_filtered.txt", "r")
-    # We just put the stops that are in the stop_times.txt
-    for stops_time in stop_times_file:
-        # we dont take the first line
-        stops_time = stops_time.split(",")
-        if stops_time[0] == "stop_id":
-            pass
-        else:
-            if stops_time[3] not in G.nodes:
-                stop = searchstop(stops_time[3])
-                if stop is not None:
-                    G.add_node(stop[0], name=stop[2], wheelchair =stop[12])
+    # the edges are the link between two stops : [i] and [i+1] and the duration : arrival in the stops [i+1] - arrival in the stops [i]
+    for line, stop in stops.items():
+        for i in range(len(stop) - 1):
+            # We add the node only if it's not already in the graph
+            if not G.has_node(stop[i][0]):
+                G.add_node(stop[i][0], name=stop[i][1], ligne=stop[i][2], branchement=0, wheelchair = stop[i][4])
+            if not G.has_node(stop[i+1][0]):
+                G.add_node(stop[i+1][0], name=stop[i + 1][1], ligne=stop[i+1][2], branchement=0, wheelchair = stop[i+1][4])
+            G.add_edge(stop[i][0], stop[i + 1][0], name=stop[i][1] + "-" + stop[i+1][1], duration=time_difference(stop[i + 1][3], stop[i][3]))
 
-    stop_times_file.close()
-    print(G.nodes)
-    # print all stops like this :
-    # id_stop : name_stop, wheelchair (2 if false, 1 if true, 0 if unknown)
 
-    for stop in G.nodes:
-        print(stop, ":", G.nodes[stop]['name'], ", wheelchair :", G.nodes[stop]['wheelchair'])
+    for node in G.nodes:
+        print(G.nodes[node])
 
-    # Now we determine the edges for all lines
-    stop_times_file = open("../Version2_Version3/data/stop_times_filtered.txt", "r")
-    for stops_time in stop_times_file:
-        # we dont take the first line
-        stops_time = stops_time.split(",")
-        if stops_time[0] == "trip_id":
-            pass
-        else:
-            G.add_node(stops_time[3], name=stops_time[3])
+
+    # We are going to add the transfers
+    # We determine the transfers thanks to transfers.txt
+
+    file = open("../Version2_Version3/data/transfers.txt", "r", encoding="utf-8")
+
+    for line in file:
+        line = line.split(",")
+        # Compare the stop_id with the nodes of the graph
+        if line[0] in G.nodes and line[1] in G.nodes:
+            duration = int(line[3])
+            if duration >=60:
+                duration = duration/60
+
+            if not G.has_edge(line[0], line[1]) and not G.has_edge(line[1], line[0]):
+                # Create the new edges with the transfer
+                G.add_edge(line[0], line[1], name="transfer", duration=duration)
+                # increment the variables branchement in the nodes
+                G.nodes[line[0]]['branchement'] += 1
+                G.nodes[line[1]]['branchement'] += 1
+
+    file.close()
+
+    for node in G.nodes:
+        print(node,G.nodes[node])
+
+    print(G.is_directed()) # juste pour vérifier que le graphe est bien non orienté
+
 
 def searchstop(stop_id):
     stops_file = open("../Version2_Version3/data/stops.txt", "r")
@@ -130,7 +163,28 @@ def searchstop(stop_id):
     stops_file.close()
     return None
 
+def get_key_from_value(line, dictionary):
+    for key, value in dictionary.items():
+        for item in value:
+            if line[0] == item[1]:  # comparing with the second element of the list
+                return key  # return the key where we find the value
+    return None  # return None if no match is found
 
+
+def time_difference(time1, time2):
+    # if the time start with something >= 24, we remove 24 to have a time between 0 and 24
+    if int(time1.split(":")[0]) >= 24:
+        time1 = str(int(time1.split(":")[0]) - 24) + ":" + time1.split(":")[1] + ":" + time1.split(":")[2]
+    if int(time2.split(":")[0]) >= 24:
+        time2 = str(int(time2.split(":")[0]) - 24) + ":" + time2.split(":")[1] + ":" + time2.split(":")[2]
+    time1 = time1.split(":")
+    time2 = time2.split(":")
+
+    time = (int(time2[0]) - int(time1[0])) * 3600 + (int(time2[1]) - int(time1[1])) * 60 + (int(time2[2]) - int(time1[2]))
+    if time < 0:
+        time = time *-1
+
+    return time/60
 
 
 
