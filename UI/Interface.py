@@ -3,6 +3,7 @@ from PIL import Image, ImageTk
 import pandas as pd
 import os
 import customtkinter as ctk
+from Graph.shortestpath import dijkstra
 
 
 class MetroAppUI(tk.Frame):
@@ -261,9 +262,16 @@ class MetroAppUI(tk.Frame):
         self.dropdown_menu_arrive.bind("<<ListboxSelect>>", self.on_dropdown_select)
 
         # Calculate button
-        calc_button = ctk.CTkButton(self.control_frame, text="Calculer l'itinéraire", command=self.button_clicked,
+        calc_button = ctk.CTkButton(self.control_frame, text="Calculer l'itinéraire", command=self.calculate_itinerary,
                                     font=("Arial", 20))
         calc_button.pack(anchor='w', pady=10, padx=(10, 10))
+
+    def calculate_itinerary(self):
+        shortest_path = dijkstra(self.metro_graph, self.selected_station_depart_id, self.selected_station_arrive_id)
+        print("The shortest path is:")
+        print(shortest_path[0])
+        print("The duration of the shortest path is:")
+        print(shortest_path[1] // 60, "minutes", shortest_path[1] % 60, "secondes")
 
     def button_clicked(self):
         print("Calculate button clicked")
