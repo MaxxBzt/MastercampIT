@@ -88,18 +88,30 @@ def dataversion2():
 
     for direction in directions.values():
         file.seek(0)  # Reset the cursor to the start of the file
+        name_to_id = {}  # Maps station names to IDs for each line separately
         for line in file:
             line = line.split(",")
             for element in direction:
                 if element[1] == line[0]:
                     line_metro = get_key_from_value(line, directions)
                     stop_name = searchstop(line[3])
-                    if element[1] not in stops:
-                        stops[element[1]] = [[line[3], stop_name[2], line_metro, line[1], stop_name[12], [stop_name[4],stop_name[5]]]]  # [stop_id, stop_name, line, time, wheelchair, coordinates]
+                    stop_id = line[3]
+                    # If the station name already exists in this line, use the existing ID
+                    if stop_name[2] in name_to_id:
+                        stop_id = name_to_id[stop_name[2]]
                     else:
-                        stops[line[0]].append([line[3], stop_name[2], line_metro, line[1], stop_name[12], [stop_name[4],stop_name[5]]])  # [stop_id, stop_name, line, time, wheelchair, coordinates]
+                        # Otherwise, map the station name to the new ID
+                        name_to_id[stop_name[2]] = stop_id
+                    if element[1] not in stops:
+                        stops[element[1]] = [[stop_id, stop_name[2], line_metro, line[1], stop_name[12], [stop_name[4],
+                                                                                                          stop_name[
+                                                                                                              5]]]]  # [stop_id, stop_name, line, time, wheelchair, coordinates]
+                    else:
+                        stops[line[0]].append([stop_id, stop_name[2], line_metro, line[1], stop_name[12], [stop_name[4],
+                                                                                                           stop_name[
+                                                                                                               5]]])  # [stop_id, stop_name, line, time, wheelchair, coordinates]
 
-
+    print(stops)
 
     # Create the graph
     G = nx.Graph()
@@ -125,6 +137,8 @@ def dataversion2():
 
     file = open("../Version2_Version3/data/transfers.txt", "r", encoding="utf-8")
 
+
+    #Permet de connecter le graph
     for line in file:
         line = line.split(",")
         # Compare the stop_id with the nodes of the graph
@@ -135,17 +149,21 @@ def dataversion2():
                 # Create the new edges with the transfer
                 G.add_edge(line[0], line[1], name="transfer", duration=duration)
                 G.add_edge(line[1], line[0], name="transfer", duration=duration)
-                # increment the variables branchement in the nodes
-                G.nodes[line[0]]['branchement'] += 1
-                G.nodes[line[1]]['branchement'] += 1
+
+    # if a node is connected to an another node which not belong to the same line, we increment the branchement attribute
+    for node in G.nodes:
+        for edge in G.edges:
+            if edge[0] == node:
+                if G.nodes[edge[1]]['ligne'] != G.nodes[node]['ligne']:
+                    G.nodes[node]['branchement'] += 1
 
     file.close()
 
 
-    for edge in G.edges:
-        # print only the tranfer edges
-        if G.edges[edge]['name'] == "transfer":
-            print("station",G.nodes[edge[0]]['name'],"-> station",G.nodes[edge[1]]['name'],"duration :",G.edges[edge]['duration'])
+    for node in G.nodes:
+        print("node", node, "name", G.nodes[node]['name'], "branchement", G.nodes[node]['branchement'])
+
+    connected = IfGraphConnect(G)
 
     pos = {}
     for node in G.nodes:
@@ -166,11 +184,10 @@ def dataversion2():
             edge_colors.append("black")
 
 
-    # display the graph
-
     nx.draw(G, pos, with_labels=False, node_size=10, edge_color=edge_colors)
     # Draw the labels
     nx.draw_networkx_labels(G, pos, labels, font_size=5)
+
 
     plt.show()
 
