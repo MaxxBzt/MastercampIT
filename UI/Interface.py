@@ -55,10 +55,10 @@ class MetroAppUI(tk.Frame):
             print("La station ", station_name, "n'a pas été trouvée.")
 
     def get_station_id_from_name(self, station_name):
-        for station_id, (_, _, name) in self.coord_dict.items():
-            if name == station_name:
-                return station_id
-        return None
+        for node in self.metro_graph.nodes(data=True):
+            if node[1]['name'] == station_name:
+                return node[0]
+        return None  # Return None if station name not found
 
     def create_quit_button(self):
         self.quit = ctk.CTkButton(self.control_frame, text="QUIT", fg_color="red", command=self.master.destroy)
@@ -211,7 +211,6 @@ class MetroAppUI(tk.Frame):
                 self.src_entry.delete(0, tk.END)
                 self.src_entry.insert(0, selected_station)
                 self.selected_station_depart_id = self.get_station_id_from_name(selected_station)
-                print(self.selected_station_depart_id)
                 self.result_label.configure(text="Selected station: " + selected_station)
             self.dropdown_menu_depart.pack_forget()
         else:
@@ -221,7 +220,6 @@ class MetroAppUI(tk.Frame):
                 self.des_entry.delete(0, tk.END)
                 self.des_entry.insert(0, selected_station)
                 self.selected_station_arrive_id = self.get_station_id_from_name(selected_station)
-                print(self.selected_station_arrive_id)
                 self.result_label2.configure(text="Selected station: " + selected_station)
             self.dropdown_menu_arrive.pack_forget()
 
