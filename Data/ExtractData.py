@@ -61,10 +61,6 @@ def dataversion2():
     file.close()
 
 
-    print("Data version 2")
-    print("Lines operated by the RATP :")
-    print(metro_lines)
-
     # Now we determine the directions for all lines
     directions = {}
 
@@ -86,50 +82,46 @@ def dataversion2():
                 if not any(item[0] == line[3] for item in directions[value]):
                     directions[value].append([line[3], line[2]])
 
-
-    stops = {} # { 1 : [[stop_id, stop_name, line, time, wheelchair],[stop_id, stop_name, line, time, wheelchair]], 2 : [[stop_id, stop_name, line, time, wheelchair],[stop_id, stop_name, line, time, wheelchair]]}
-
-    # we will determine all the stops in the order of the line for each line with the time of the arrival in the stops, according to the trip found in the direction dictionary
     file = open("../Version2_Version3/data/stop_times_filtered.txt", "r", encoding="utf-8")
 
-    # TODO : add the trip id to the stops
-    for line in file:
-        line = line.split(",")
-        if get_key_from_value(line, directions):
-            key = get_key_from_value(line, directions)
-            stop_name = searchstop(line[3])
-            if key not in stops:
-                stops[key] = [[line[3], stop_name[2], key, line[1], stop_name[12]]] # [stop_id, stop_name, line, time, wheelchair]
-            else:
-                # Check if stop_name is not already in the list for the key
-                if not any(item[1] == stop_name[2] for item in stops[key]):
-                    stops[key].append([line[3], stop_name[2], key, line[1], stop_name[12]]) # [stop_id, stop_name, line, time, wheelchair]
+    stops = {} # { 1 : [ trip 1 : [[stop_id, stop_name, line, time, wheelchair],[stop_id, stop_name, line, time, wheelchair]], trip 2 : [[....]], 2 : [[stop_id, stop_name, line, time, wheelchair],[stop_id, stop_name, line, time, wheelchair]]}
 
-    file.close()
-    print(stops)
+    for direction in directions.values():
+        file.seek(0)  # Reset the cursor to the start of the file
+        for line in file:
+            line = line.split(",")
+            for element in direction:
+                if element[1] == line[0]:
+                    line_metro = get_key_from_value(line, directions)
+                    stop_name = searchstop(line[3])
+                    if element[1] not in stops:
+                        stops[element[1]] = [[line[3], stop_name[2], line_metro, line[1], stop_name[12], [stop_name[4],stop_name[5]]]]  # [stop_id, stop_name, line, time, wheelchair, coordinates]
+                    else:
+                        stops[line[0]].append([line[3], stop_name[2], line_metro, line[1], stop_name[12], [stop_name[4],stop_name[5]]])  # [stop_id, stop_name, line, time, wheelchair, coordinates]
 
-    # Create all the nodes and edges
+
+
+    # Create the graph
     G = nx.Graph()
-    # the edges are the link between two stops : [i] and [i+1] and the duration : arrival in the stops [i+1] - arrival in the stops [i]
-    for line, stop in stops.items():
+
+    for trip, stop in stops.items():
         for i in range(len(stop) - 1):
-            # We add the node only if it's not already in the graph
             if not G.has_node(stop[i][0]):
-                G.add_node(stop[i][0], name=stop[i][1], ligne=stop[i][2], branchement=0, wheelchair = stop[i][4])
-            if not G.has_node(stop[i+1][0]):
-                G.add_node(stop[i+1][0], name=stop[i + 1][1], ligne=stop[i+1][2], branchement=0, wheelchair = stop[i+1][4])
-            G.add_edge(stop[i][0], stop[i + 1][0], name=stop[i][1] + "-" + stop[i+1][1], duration=time_difference(stop[i + 1][3], stop[i][3]))
+                G.add_node(stop[i][0], name=stop[i][1], ligne=stop[i][2], branchement=0, wheelchair=stop[i][4],
+                           coordinates=tuple(map(float, stop[i][5])))
+            if not G.has_node(stop[i + 1][0]):
+                G.add_node(stop[i + 1][0], name=stop[i + 1][1], ligne=stop[i + 1][2], branchement=0,
+                           wheelchair=stop[i + 1][4], coordinates=tuple(map(float, stop[i + 1][5])))
 
+            # Verify if the edge already exists
+            if not G.has_edge(stop[i][0], stop[i + 1][0]):
+                # we will choose directed edges to avoid pb with the dir
+                G.add_edge(stop[i][0], stop[i + 1][0],name=stop[i][1] + "-" + stop[i + 1][1], duration=time_difference(stop[i][3], stop[i + 1][3]))
+                G.add_edge(stop[i+1][0], stop[i][0], name=stop[i+1][1] + "-" + stop[i][1],
+                           duration=time_difference(stop[i][3], stop[i + 1][3]))
 
-    for node in G.nodes:
-        print(G.nodes[node])
-
-    for edges in G.edges:
-        print(G.edges[edges])
-
-
-    # We are going to add the transfers
-    # We determine the transfers thanks to transfers.txt
+        # We are going to add the transfers
+        # We determine the transfers thanks to transfers.txt
 
     file = open("../Version2_Version3/data/transfers.txt", "r", encoding="utf-8")
 
@@ -137,27 +129,50 @@ def dataversion2():
         line = line.split(",")
         # Compare the stop_id with the nodes of the graph
         if line[0] in G.nodes and line[1] in G.nodes:
-            duration = int(line[3]) # en seconde
-            round(duration,2)
+            duration = int(line[3])  # en seconde
+            round(duration, 2)
             if not G.has_edge(line[0], line[1]) and not G.has_edge(line[1], line[0]):
                 # Create the new edges with the transfer
                 G.add_edge(line[0], line[1], name="transfer", duration=duration)
+                G.add_edge(line[1], line[0], name="transfer", duration=duration)
                 # increment the variables branchement in the nodes
                 G.nodes[line[0]]['branchement'] += 1
                 G.nodes[line[1]]['branchement'] += 1
 
     file.close()
 
+
+    for edge in G.edges:
+        # print only the tranfer edges
+        if G.edges[edge]['name'] == "transfer":
+            print("station",G.nodes[edge[0]]['name'],"-> station",G.nodes[edge[1]]['name'],"duration :",G.edges[edge]['duration'])
+
+    pos = {}
     for node in G.nodes:
-        print(node,G.nodes[node])
+        pos[node] = G.nodes[node]['coordinates']
 
-    for edges in G.edges:
-        print(G.edges[edges])
+    # The label to be the name of the station
+    labels = {}
+    for node in G.nodes:
+        labels[node] = G.nodes[node]['name']
 
-    print(G.is_directed()) # juste pour vérifier que le graphe est bien non orienté
+    #  the edges with the name tranfer is in red
 
-    connected = IfGraphConnect(G)
-    print(connected)
+    edge_colors = []
+    for edge in G.edges:
+        if G.edges[edge]['name'] == "transfer":
+            edge_colors.append("red")
+        else:
+            edge_colors.append("black")
+
+
+    # display the graph
+
+    nx.draw(G, pos, with_labels=False, node_size=10, edge_color=edge_colors)
+    # Draw the labels
+    nx.draw_networkx_labels(G, pos, labels, font_size=5)
+
+    plt.show()
 
     return G
 
