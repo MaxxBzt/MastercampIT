@@ -5,19 +5,23 @@ import os
 import customtkinter as ctk
 
 class MetroAppUI(tk.Frame):
-    def __init__(self, master=None, image_path=None, points_txt=None):
+    def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None):
         super().__init__(master)
         self.master = master
         self.master.title("Metro App")
         self.screen_width = self.master.winfo_screenwidth()
         self.screen_height = self.master.winfo_screenheight()
         self.points_txt = points_txt
+        self.image_path = image_path
+        self.metro_graph = metro_graph
+
+        # dictionary that will remember which point is linked to which coordinates
+        self.coord_dict = {}
 
         # Set the size of the tkinter window
         self.master.geometry(f"{self.screen_width}x{self.screen_height}")
         self.master.resizable(width=True, height=True)
 
-        self.image_path = image_path
 
         # Create the main window elements
         self.create_main_layout()
@@ -26,6 +30,25 @@ class MetroAppUI(tk.Frame):
         self.init_image_display()
 
         self.points_data = self.load_points()
+
+    def find_station_id(self, event):
+        # Get the id of the clicked object
+        point_id = event.widget.find_closest(event.x, event.y)[0]
+        if point_id in self.coord_dict:
+            x, y, station_name = self.coord_dict[point_id]
+            print(f"Coordonnées du point cliquées: ({x}, {y}, {station_name})")
+        else:
+            print("Vous avez cliqué sur un point inconnu.")
+
+        # data=True get us : (node, node_attribute_dict)
+        #        node = the node ID & node_attribute_dict a dictionary of the node's attributes
+        # without it, we only get the node's ID, not attributes
+        for node in self.metro_graph.nodes(data=True):
+            if node[1]['name'] == station_name:
+                print("Station ID:", node[0])
+                break
+        else:
+            print("La station ", station_name, "n'a pas été trouvée.")
 
     def load_points(self):
         if not os.path.isfile(self.points_txt):
@@ -94,17 +117,23 @@ class MetroAppUI(tk.Frame):
 
         # Draw points on canvas
         for index, row in self.points_data.iterrows():
-            x, y = row['x'], row['y']
+            x, y, station = row['x'], row['y'], row['station']
 
             # Convert the coordinates to the resized image coordinates
             new_x = x * scale_x + offset_x
             new_y = y * scale_y + offset_y
 
             # Draw points
-            self.canvas.create_oval(
+            point = self.canvas.create_oval(
                 new_x - 5, new_y - 5, new_x + 5, new_y + 5,
                 fill='white', outline='black'
             )
+            # Store the point and its corresponding coordinates
+            self.coord_dict[point] = (x, y, station)
+            # Bind the point with the find_station_id function on left mouse click
+            self.canvas.tag_bind(point, "<Button-1>", self.find_station_id)
+
+
 
     def create_quit_button(self):
         self.quit = ctk.CTkButton(self.control_frame, text="QUIT", fg_color="red", command=self.master.destroy)

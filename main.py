@@ -2,6 +2,7 @@ import networkx as nx
 import tkinter as tk
 from UI.Interface import MetroAppUI
 from Data.ExtractData import dataversion1
+import networkx as nx
 
 metro_image_path = "Version1/metrof_r.png"
 file_path = 'Version1/pospoints.txt'
@@ -9,9 +10,10 @@ file_path = 'Version1/pospoints.txt'
 metro_graph_v1 = dataversion1()
 
 root = tk.Tk()
-app = MetroAppUI(master=root, image_path=metro_image_path, points_txt=file_path, metro_graph=metro_graph_v1)
+app = MetroAppUI(master=root, image_path=metro_image_path, points_txt=file_path, metro_graph= metro_graph_v1)
 app.mainloop()
 
+'''
 G = nx.Graph()
 
 G.add_node(1, name="Abesses", ligne=12, if_terminus=False, branchement=0)
@@ -25,3 +27,4 @@ G.number_of_nodes()
 G.number_of_edges()
 print(list(G.nodes))
 print(list(G.edges))
+'''
