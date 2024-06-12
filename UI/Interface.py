@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import customtkinter as ctk
 
+
 class MetroAppUI(tk.Frame):
     def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None):
         super().__init__(master)
@@ -14,6 +15,8 @@ class MetroAppUI(tk.Frame):
         self.points_txt = points_txt
         self.image_path = image_path
         self.metro_graph = metro_graph
+        self.selected_station_arrive_id = None
+        self.selected_station_depart_id = None
 
         # dictionary that will remember which point is linked to which coordinates
         self.coord_dict = {}
@@ -22,7 +25,6 @@ class MetroAppUI(tk.Frame):
         self.master.geometry(f"{self.screen_width}x{self.screen_height}")
         self.master.resizable(width=True, height=True)
 
-
         # Create the main window elements
         self.create_main_layout()
 
@@ -30,6 +32,8 @@ class MetroAppUI(tk.Frame):
         self.init_image_display()
 
         self.points_data = self.load_points()
+
+    ''' UI UTILITARY FUNCTIONS -- functions useful in the UI interface '''
 
     def find_station_id(self, event):
         # Get the id of the clicked object
@@ -50,6 +54,19 @@ class MetroAppUI(tk.Frame):
         else:
             print("La station ", station_name, "n'a pas été trouvée.")
 
+    def get_station_id_from_name(self, station_name):
+        for station_id, (_, _, name) in self.coord_dict.items():
+            if name == station_name:
+                return station_id
+        return None
+
+    def create_quit_button(self):
+        self.quit = ctk.CTkButton(self.control_frame, text="QUIT", fg_color="red", command=self.master.destroy)
+        self.quit.pack(side="bottom", pady=10)
+
+
+    ''' UI MANDATORY FUNCTIONS -- functions that do big things in UI '''
+
     def load_points(self):
         if not os.path.isfile(self.points_txt):
             print(f"Le fichier {self.points_txt} n'a pas été trouvé. Vérifiez le chemin du fichier.")
@@ -67,8 +84,9 @@ class MetroAppUI(tk.Frame):
         # Create the canvas for the image
         self.canvas_frame = tk.Frame(self.master)
         self.canvas_frame.pack(side="right", fill="both", expand=True)
-        
-        self.canvas = tk.Canvas(self.canvas_frame, background=self.master.cget('bg'), bd=0, highlightthickness=0, relief='ridge')
+
+        self.canvas = tk.Canvas(self.canvas_frame, background=self.master.cget('bg'), bd=0, highlightthickness=0,
+                                relief='ridge')
         self.canvas.pack(fill="both", expand=True)
         self.canvas.bind('<Configure>', self.show_full_image)
 
@@ -133,33 +151,121 @@ class MetroAppUI(tk.Frame):
             # Bind the point with the find_station_id function on left mouse click
             self.canvas.tag_bind(point, "<Button-1>", self.find_station_id)
 
+    def on_src_entry_change(self, src_entry):
+        # here we convert the input of user to lowercase in case he does maj
+        user_input = self.src_entry.get().strip().lower()
 
+        # we start the search of station when we have 3 characters in the input
+        if len(user_input) < 3:
+            self.dropdown_menu_depart.pack_forget()
+            return
 
-    def create_quit_button(self):
-        self.quit = ctk.CTkButton(self.control_frame, text="QUIT", fg_color="red", command=self.master.destroy)
-        self.quit.pack(side="bottom", pady=10)
+        self.dropdown_menu_depart.delete(0, tk.END)
+        matching_stations = []
+
+        for node in self.metro_graph.nodes(data=True):
+            if user_input in node[1]['name'].lower():
+                matching_stations.append(node[1]['name'])
+
+        if matching_stations:
+            for station in matching_stations:
+                self.dropdown_menu_depart.insert(tk.END, station)
+            self.dropdown_menu_depart.pack(anchor='w', pady=(5, 0), padx=(10, 10))
+        else:
+            self.dropdown_menu_depart.pack_forget()
+
+        # Call on_dropdown_select with is_it_station_depart=True
+        self.dropdown_menu_depart.bind("<<ListboxSelect>>", lambda event: self.on_dropdown_select(True, event))
+
+    def on_des_entry_change(self, des_entry):
+
+        user_input = self.des_entry.get().strip().lower()
+
+        # we start the search of station when we have 3 characters in the input
+        if len(user_input) < 3:
+            self.dropdown_menu_arrive.pack_forget()
+            return
+
+        self.dropdown_menu_arrive.delete(0, tk.END)
+        matching_stations = []
+
+        for node in self.metro_graph.nodes(data=True):
+            if user_input in node[1]['name'].lower():
+                matching_stations.append(node[1]['name'])
+
+        if matching_stations:
+            for station in matching_stations:
+                self.dropdown_menu_arrive.insert(tk.END, station)
+            self.dropdown_menu_arrive.pack(anchor='w', pady=(5, 0), padx=(10, 10))
+        else:
+            self.dropdown_menu_arrive.pack_forget()
+
+        self.dropdown_menu_arrive.bind("<<ListboxSelect>>", lambda event: self.on_dropdown_select(False, event))
+
+    def on_dropdown_select(self, is_it_station_depart, event=None):
+
+        if is_it_station_depart:
+
+            if self.dropdown_menu_depart.curselection():
+                selected_station = self.dropdown_menu_depart.get(self.dropdown_menu_depart.curselection()[0])
+                self.src_entry.delete(0, tk.END)
+                self.src_entry.insert(0, selected_station)
+                self.selected_station_depart_id = self.get_station_id_from_name(selected_station)
+                print(self.selected_station_depart_id)
+                self.result_label.configure(text="Selected station: " + selected_station)
+            self.dropdown_menu_depart.pack_forget()
+        else:
+
+            if self.dropdown_menu_arrive.curselection():
+                selected_station = self.dropdown_menu_arrive.get(self.dropdown_menu_arrive.curselection()[0])
+                self.des_entry.delete(0, tk.END)
+                self.des_entry.insert(0, selected_station)
+                self.selected_station_arrive_id = self.get_station_id_from_name(selected_station)
+                print(self.selected_station_arrive_id)
+                self.result_label2.configure(text="Selected station: " + selected_station)
+            self.dropdown_menu_arrive.pack_forget()
 
     def create_input_controls(self):
         # Configure appearance
         ctk.set_appearance_mode("automatic")
         ctk.set_default_color_theme("blue")
-        
+
         # Depart
         src_label = ctk.CTkLabel(self.control_frame, text="Position de départ:", font=("Arial", 16))
         src_label.pack(anchor='w', pady=(30, 10), padx=(10, 10))
+        # this deals with the entry of input of station de départ
         self.src_entry = ctk.CTkEntry(self.control_frame, font=("Arial", 16), width=300, height=40)
         self.src_entry.pack(anchor='w', pady=15, padx=(10, 10))
+        self.src_entry.bind("<KeyRelease>", lambda event: self.on_src_entry_change(self.src_entry))
+
+        # Label to display matching stations
+        self.result_label = tk.Label(self.control_frame, text="", font=("Arial", 16))
+        self.result_label.pack(anchor='w', pady=(5, 0), padx=(10, 10))
+
+        # Dropdown menu for matching stations
+        self.dropdown_menu_depart = tk.Listbox(self.control_frame, font=("Arial", 16), width=30, height=5)
+        self.dropdown_menu_depart.bind("<<ListboxSelect>>", self.on_dropdown_select)
 
         # Destination
         des_label = ctk.CTkLabel(self.control_frame, text="Destination:", font=("Arial", 16))
         des_label.pack(anchor='w', pady=10, padx=(10, 10))
+        # this deals with the entry of input of station de départ
         self.des_entry = ctk.CTkEntry(self.control_frame, font=("Arial", 16), width=300, height=40)
         self.des_entry.pack(anchor='w', pady=15, padx=(10, 10))
+        self.des_entry.bind("<KeyRelease>", lambda event: self.on_des_entry_change(self.des_entry))
+
+        # Label to display matching stations
+        self.result_label2 = tk.Label(self.control_frame, text="", font=("Arial", 16))
+        self.result_label2.pack(anchor='w', pady=5, padx=(10, 10))
+
+        # Dropdown menu for matching stations
+        self.dropdown_menu_arrive = tk.Listbox(self.control_frame, font=("Arial", 16), width=30, height=5)
+        self.dropdown_menu_arrive.bind("<<ListboxSelect>>", self.on_dropdown_select)
 
         # Calculate button
-        calc_button = ctk.CTkButton(self.control_frame, text="Calculer l'itinéraire", command=self.button_clicked, font=("Arial", 20))
+        calc_button = ctk.CTkButton(self.control_frame, text="Calculer l'itinéraire", command=self.button_clicked,
+                                    font=("Arial", 20))
         calc_button.pack(anchor='w', pady=10, padx=(10, 10))
 
     def button_clicked(self):
         print("Calculate button clicked")
-
