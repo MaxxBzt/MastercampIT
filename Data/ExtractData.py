@@ -1,3 +1,5 @@
+from networkx import is_directed
+
 from Graph.shortestpath import *
 
 # # format pour les sommets :
@@ -114,7 +116,7 @@ def dataversion2():
     print(stops)
 
     # Create the graph
-    G = nx.Graph()
+    G = nx.DiGraph()
 
     for trip, stop in stops.items():
         for i in range(len(stop) - 1):
@@ -125,12 +127,19 @@ def dataversion2():
                 G.add_node(stop[i + 1][0], name=stop[i + 1][1], ligne=stop[i + 1][2], branchement=0,
                            wheelchair=stop[i + 1][4], coordinates=tuple(map(float, stop[i + 1][5])))
 
+            # Store all the direction of the line
+            terminus = directions[stop[i][2]]
+            print(terminus)
             # Verify if the edge already exists
             if not G.has_edge(stop[i][0], stop[i + 1][0]):
-                # we will choose directed edges to avoid pb with the dir
-                G.add_edge(stop[i][0], stop[i + 1][0],name=stop[i][1] + "-" + stop[i + 1][1], duration=time_difference(stop[i][3], stop[i + 1][3]))
-                G.add_edge(stop[i+1][0], stop[i][0], name=stop[i+1][1] + "-" + stop[i][1],
-                           duration=time_difference(stop[i][3], stop[i + 1][3]))
+                # we will choose directed edges to avoid pb with the directions
+                if len(terminus) >=3:
+                    G.add_edge(stop[i][0], stop[i + 1][0],name=stop[i][1] + "-" + stop[i + 1][1], duration=time_difference(stop[i][3], stop[i + 1][3]))
+                    G.add_edge(stop[i+1][0], stop[i][0], name=stop[i+1][1] + "-" + stop[i][1],
+                               duration=time_difference(stop[i][3], stop[i + 1][3]))
+                else :
+                    G.add_edge(stop[i][0], stop[i + 1][0], name=stop[i][1] + "-" + stop[i + 1][1],
+                               duration=time_difference(stop[i][3], stop[i + 1][3]))
 
         # We are going to add the transfers
         # We determine the transfers thanks to transfers.txt
@@ -158,6 +167,9 @@ def dataversion2():
                     G.nodes[node]['branchement'] += 1
 
     file.close()
+
+    # verify if the graph is directed
+    print(is_directed(G))
 
 
     for node in G.nodes:
