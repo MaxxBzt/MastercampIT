@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 
 def dataversion1():
     print("Data version 1")
-    file = open("../Version1/metro.txt", "r", encoding ='utf-8')
+    file = open("Version1/metro.txt", "r", encoding ='utf-8')
     # start at line 15
     for i in range(15):
         file.readline()
@@ -51,7 +51,7 @@ def dataversion2():
 
     # We determine all the lines metro operated by the RATP thanks to routes.txt
     # Reminders : it's metro if the route_type is 1
-    file = open("../Version2_Version3/data/routes.txt", "r")
+    file = open("Version2_Version3/data/routes.txt", "r")
     metro_lines = {}
     # We don't take in consideration the first line
 
@@ -67,7 +67,7 @@ def dataversion2():
     directions = {}
 
     # We determine the directions for all lines thanks to trips_filtered.txt
-    file = open("../Version2_Version3/data/trip_id_filtered.txt", "r", encoding="utf-8")
+    file = open("Version2_Version3/data/trip_id_filtered.txt", "r", encoding="utf-8")
 
     # For each trip_id of the text trip_id_filtered.txt we determine the direction
     for line in file:
@@ -84,7 +84,7 @@ def dataversion2():
                 if not any(item[0] == line[3] for item in directions[value]):
                     directions[value].append([line[3], line[2]])
 
-    file = open("../Version2_Version3/data/stop_times_filtered.txt", "r", encoding="utf-8")
+    file = open("Version2_Version3/data/stop_times_filtered.txt", "r", encoding="utf-8")
 
     stops = {} # { 1 : [ trip 1 : [[stop_id, stop_name, line, time, wheelchair],[stop_id, stop_name, line, time, wheelchair]], trip 2 : [[....]], 2 : [[stop_id, stop_name, line, time, wheelchair],[stop_id, stop_name, line, time, wheelchair]]}
 
@@ -144,7 +144,7 @@ def dataversion2():
         # We are going to add the transfers
         # We determine the transfers thanks to transfers.txt
 
-    file = open("../Version2_Version3/data/transfers.txt", "r", encoding="utf-8")
+    file = open("Version2_Version3/data/transfers.txt", "r", encoding="utf-8")
 
 
     #Permet de connecter le graph
@@ -196,6 +196,8 @@ def dataversion2():
             edge_colors.append("black")
 
 
+    # display the graph
+
     nx.draw(G, pos, with_labels=False, node_size=10, edge_color=edge_colors)
     # Draw the labels
     nx.draw_networkx_labels(G, pos, labels, font_size=5)
@@ -207,7 +209,7 @@ def dataversion2():
 
 
 def searchstop(stop_id):
-    stops_file = open("../Version2_Version3/data/stops.txt", "r")
+    stops_file = open("Version2_Version3/data/stops.txt", "r")
     for stops in stops_file:
         stops = stops.split(",")
         if stops[0] == stop_id:
@@ -242,16 +244,16 @@ def time_difference(time1, time2):
 
 
 
-dataversion1()
-test = dijkstra(dataversion1(), 1,25)
-print(test)
-print("The shortest path is:")
-print(test[0])
-print("The duration of the shortest path is:")
+#dataversion1()
+#test = dijkstra(dataversion1(), 1,25)
+#print(test)
+#print("The shortest path is:")
+#print(test[0])
+#print("The duration of the shortest path is:")
 # Convertir secondes en minutes
-print(test[1]//60,"minutes",test[1]%60,"secondes")
+#print(test[1]//60,"minutes",test[1]%60,"secondes")
 
-dataversion2()
+#dataversion2()
 
 '''
 G = dataversion1()

@@ -50,7 +50,7 @@ V 0033 Bonne Nouvelle ;9 ;False 0
 V 0034 Botzaris ;7bis ;False 0
 V 0035 Boucicaut ;8 ;False 0
 V 0036 Boulogne, Jean Jaurès ;10 ;False 0
-V 0037 Boulogne, Pont de Saint-Cloud, Rond Point Rhin et Danube ;10 ;True 0
+V 0037 Boulogne, Pont de Saint-Cloud ;10 ;True 0
 V 0038 Bourse ;3 ;False 0
 V 0039 Brochant ;13 ;False 2
 V 0040 Bréguet-Sabin ;5 ;False 0

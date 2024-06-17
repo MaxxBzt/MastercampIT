@@ -6,6 +6,7 @@ import customtkinter as ctk
 from Graph.shortestpath import dijkstra
 
 
+
 class MetroAppUI(tk.Frame):
     def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None):
         super().__init__(master)
@@ -62,7 +63,7 @@ class MetroAppUI(tk.Frame):
         return None  # Return None if station name not found
 
     def create_quit_button(self):
-        self.quit = ctk.CTkButton(self.control_frame, text="QUIT", fg_color="red", command=self.master.destroy)
+        self.quit = ctk.CTkButton(self.control_frame, text="Quit the app", fg_color="red", command=self.master.destroy, hover_color="crimson")
         self.quit.pack(side="bottom", pady=10)
 
 
@@ -262,8 +263,21 @@ class MetroAppUI(tk.Frame):
         self.dropdown_menu_arrive.bind("<<ListboxSelect>>", self.on_dropdown_select)
 
         # Calculate button
-        calc_button = ctk.CTkButton(self.control_frame, text="Calculer l'itinéraire", command=self.calculate_itinerary,
-                                    font=("Arial", 20))
+        calc_button = ctk.CTkButton(
+            self.control_frame,
+            text="Calculer l'itinéraire",
+            command=self.calculate_itinerary,
+            text_color="white",
+            font=("Arial", 20),
+            fg_color="#669AEF",  # Button background color
+            hover_color="#2563EB",  # Button color when hovered
+            corner_radius=10,  # Rounded corners
+            border_width=2,  # Border width
+            border_color="#1D4ED8",  # Border color
+            width = 250,  # Adjusted width
+            height=50  # Adjusted height
+
+        )
         calc_button.pack(anchor='w', pady=10, padx=(10, 10))
 
     def calculate_itinerary(self):
