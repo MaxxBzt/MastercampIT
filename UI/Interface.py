@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import customtkinter as ctk
 from Graph.shortestpath import dijkstra
+from unidecode import unidecode
 
 
 
@@ -155,7 +156,7 @@ class MetroAppUI(tk.Frame):
 
     def on_src_entry_change(self, src_entry):
         # here we convert the input of user to lowercase in case he does maj
-        user_input = self.src_entry.get().strip().lower()
+        user_input = unidecode(self.src_entry.get().strip().lower())
 
         # we start the search of station when we have 3 characters in the input
         if len(user_input) < 3:
@@ -166,7 +167,8 @@ class MetroAppUI(tk.Frame):
         matching_stations = []
 
         for node in self.metro_graph.nodes(data=True):
-            if user_input in node[1]['name'].lower():
+            station_name_normalized = unidecode(node[1]['name'].lower())
+            if user_input in station_name_normalized:
                 matching_stations.append(node[1]['name'])
 
         if matching_stations:
@@ -181,18 +183,18 @@ class MetroAppUI(tk.Frame):
 
     def on_des_entry_change(self, des_entry):
 
-        user_input = self.des_entry.get().strip().lower()
+        user_input = unidecode(self.des_entry.get().strip().lower())
 
         # we start the search of station when we have 3 characters in the input
         if len(user_input) < 3:
             self.dropdown_menu_arrive.pack_forget()
             return
-
         self.dropdown_menu_arrive.delete(0, tk.END)
         matching_stations = []
 
         for node in self.metro_graph.nodes(data=True):
-            if user_input in node[1]['name'].lower():
+            station_name_normalized = unidecode(node[1]['name'].lower())
+            if user_input in station_name_normalized:
                 matching_stations.append(node[1]['name'])
 
         if matching_stations:
