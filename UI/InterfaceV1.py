@@ -14,6 +14,7 @@ from unidecode import unidecode
 
 
 
+
 class MetroAppUI(tk.Frame):
     def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None):
         super().__init__(master)
@@ -310,6 +311,27 @@ class MetroAppUI(tk.Frame):
         self.des_entry.pack(anchor='w', pady=15, padx=(10, 10))
         self.des_entry.bind("<KeyRelease>", lambda event: self.on_des_entry_change(self.des_entry))
         self.des_entry.bind("<FocusIn>", lambda event: self.set_selecting_arrival())
+        icon = Image.open("Version1/LOGO_EFREI-WEB_blanc.png")
+        icon = icon.resize((30, 30))
+        icon = ImageTk.PhotoImage(icon)
+
+        set_station_button = ctk.CTkButton(
+            self.control_frame,
+            text="EFREI",
+            command=lambda: self.set_station_as_destination('Villejuif - Louis Aragon'),
+            text_color="white",
+            image=icon,
+            compound="left",
+            font=("Arial", 20),
+            fg_color="#163767",  # Button background color
+            hover_color="#377fbc",  # Button color when hovered
+            corner_radius=10,  # Rounded corners
+            border_width=2,  # Border width
+            border_color="#377fbc",  # Border color
+            width=150,  # Adjusted width
+            height=50  # Adjusted height
+        )
+        set_station_button.pack(anchor='w', pady=10, padx=(10, 10))
 
         # Label to display matching stations
         self.result_label2 = tk.Label(self.control_frame, text="", font=("Arial", 16))
@@ -352,8 +374,13 @@ class MetroAppUI(tk.Frame):
         )
         acpm_button.pack(anchor='w', pady=10, padx=(10, 10))
 
-    import matplotlib.pyplot as plt
-    import networkx as nx
+    def set_station_as_destination(self, station_name):
+        """Set a specific station as the destination."""
+        self.des_entry.delete(0, tk.END)
+        self.des_entry.insert(0, station_name)
+        self.selected_station_arrive_id = self.get_station_id_from_name(station_name)
+        self.result_label2.configure(text="Selected station: " + station_name)
+
 
     def show_acpm_tree(self):
         ACPM = findACPM_Prim(self.metro_graph)
