@@ -5,7 +5,7 @@ import time
 import networkx as nx
 import tkinter as tk
 import customtkinter as ctk
-from UI.Interface import MetroAppUI
+from UI.InterfaceV1 import MetroAppUI
 from Data.ExtractData import dataversion1, dataversion2
 
 

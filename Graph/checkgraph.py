@@ -31,15 +31,15 @@ def IfGraphConnect(G):
 
 def findACPM_Prim(G):
     # Initialisation des structures de données
-    nodes = list(G.nodes)
+    nodes = list(G.nodes(data=True))
     edges = list(G.edges(data=True))
 
     # Initialisation des nœuds visités et non visités
     visited = set()
-    unvisited = set(nodes)
+    unvisited = {node[0] for node in nodes}
 
     # Choisir un nœud initial et l'ajouter à l'ensemble des nœuds visités
-    current_node = nodes[0]
+    current_node = nodes[0][0]
     visited.add(current_node)
     unvisited.remove(current_node)
 
@@ -52,12 +52,13 @@ def findACPM_Prim(G):
         min_duration = float('inf')
 
         # Parcourir tous les nœuds visités
-        for visited_nodes in visited:
-            for unvisited_nodes, data in G[visited_nodes].items():
+        for visited_node in visited:
+            for unvisited_node, data in G[visited_node].items():
                 duration = data.get('duration', float('inf'))
                 # Si le nœud non visité est dans l'ensemble des nœuds non visités et que la durée est inférieure à la durée minimale trouvée jusqu'à présent
-                if unvisited_nodes in unvisited and duration < min_duration:
-                    min_edge = (visited_nodes, unvisited_nodes, duration)
+                # En ne sélectionnant que les nœuds non visités lors de l'ajout des arêtes, vous vous assurez qu'aucun cycle n'est créé.
+                if unvisited_node in unvisited and duration < min_duration:
+                    min_edge = (visited_node, unvisited_node, duration)
                     min_duration = duration
 
         if min_edge:
@@ -65,17 +66,22 @@ def findACPM_Prim(G):
             mst_edges.append(min_edge)
 
             # Mettre à jour les ensembles de nœuds visités et non visités
-            _, unvisited_nodes, _ = min_edge
-            visited.add(unvisited_nodes)
-            unvisited.remove(unvisited_nodes)
+            _, unvisited_node, _ = min_edge
+            visited.add(unvisited_node)
+            unvisited.remove(unvisited_node)
 
     # Construire le graphe de l'ACPM
     acpm_graph = nx.Graph()
-    acpm_graph.add_nodes_from(nodes)
-    for visited_nodes, unvisited_nodes, duration in mst_edges:
-        acpm_graph.add_edge(visited_nodes, unvisited_nodes, duration=duration)
 
-    print("The ACPM of the graph is : ")
-    print(acpm_graph.edges(data=True))
+    # Ajouter les nœuds avec leurs attributs
+    for node, attr in nodes:
+        acpm_graph.add_node(node, **attr)
+
+    # Ajouter les arêtes avec la durée
+    for visited_node, unvisited_node, duration in mst_edges:
+        acpm_graph.add_edge(visited_node, unvisited_node, duration=duration)
+
+
+
 
     return acpm_graph

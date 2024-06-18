@@ -37,8 +37,25 @@ def dataversion1():
             line = line.split()
             G.add_edge(int(line[1]), int(line[2]), duration=int(line[3]))
 
+    # We need to merge the nodes with the same name
+    nodes = list(G.nodes)
+
+
+    i = 0
+    while i < len(nodes):
+        node = nodes[i]
+        for j in range(i + 1, len(nodes)):
+            node2 = nodes[j]
+            if G.nodes[node]['name'] == G.nodes[node2]['name']:
+                # We merge the nodes
+                G = nx.contracted_nodes(G, node, node2, self_loops=False)
+                nodes = list(G.nodes)  # Update the list of nodes
+                break
+        else:
+            i += 1  # Only increment i if no nodes were merged in the inner loop
+
     file.close()
-    #print(G)
+    print(G)
     #print(G.nodes)
     #print(G.edges)
 
@@ -244,7 +261,7 @@ def time_difference(time1, time2):
 
 
 
-#dataversion1()
+dataversion1()
 #test = dijkstra(dataversion1(), 1,25)
 #print(test)
 #print("The shortest path is:")
