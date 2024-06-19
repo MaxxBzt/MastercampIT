@@ -39,7 +39,7 @@ def choose_data_menu():
     # Initialize the main window
     app = ctk.CTk()
     app.geometry("650x500")
-    app.title("Metro, Efrei, Dodo - Choose Data")
+    app.title("Metro, Efrei, Dodo - Choosir la version")
 
     # Set appearance mode and default color theme
     ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
@@ -65,10 +65,10 @@ def choose_data_menu():
     button1.grid(row=0, column=0, padx=20, pady=10, sticky="ew")
 
 
-    description1 = ctk.CTkLabel(frame, text="Description for Version 1:\n\n"
-                                            "This version is the most basic one with a map of the metro"
-                                            " and the possibility to calculate the shortest path between two stations.\n"
-                                            "The graph is undirected. This version is efficient & quick but lacks updates or new data.",
+    description1 = ctk.CTkLabel(frame, text="Description pour la Version 1:\n\n"
+                                            "Cette version est la plus basique avec un plan du métro"
+                                            " et la possibilité de calculer le chemin le plus court entre deux stations.\n"
+                                            "Le graphique n'est pas orienté. Cette version est efficace et rapide mais manque de mises à jour ou de nouvelles données.",
                                 wraplength=250, anchor="nw", justify="left")
     description1.grid(row=1, column=0, padx=20, pady=5, sticky="nsew")
 
@@ -77,14 +77,14 @@ def choose_data_menu():
     # button2 = ctk.CTkButton(frame, text="Version 2", command=test_callback)  # Temporary test callback
     button2.grid(row=0, column=1, padx=20, pady=10, sticky="ew")
 
-    description2 = ctk.CTkLabel(frame, text="Description for Version 2:\n\n"
-                                            "This version includes data from IDFM 2024, the graph is directed and includes more information.\n"
-                                            "This version is more complex, and less efficient but includes more data and is more accurate.",
+    description2 = ctk.CTkLabel(frame, text="Description pour la Version 2:\n\n"
+                                            "Cette version inclut les données d'IDFM 2024, le graphique est orienté et comprend plus d'informations.\n"
+                                            "Cette version est plus complexe et moins efficace mais inclut plus de données et est plus précise.",
                                 wraplength=250, anchor="nw", justify="left")
     description2.grid(row=1, column=1, padx=20, pady=5, sticky="nsew")
 
     # Create developer names label
-    developers_label = ctk.CTkLabel(app, text="Beautifully coded by our team: Yoke, Maxime, Roxanne, Mélissa & Audrey",
+    developers_label = ctk.CTkLabel(app, text="Magnifiquement codé par notre équipe : Yoke, Maxime, Roxanne, Mélissa & Audrey",
                                     font=ctk.CTkFont(size=12))
     developers_label.pack(side="bottom", pady=20)
 
