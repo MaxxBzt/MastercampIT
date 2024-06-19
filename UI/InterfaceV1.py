@@ -16,6 +16,7 @@ from unidecode import unidecode
 class MetroAppUI(tk.Frame):
     def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None, metro_line_image=None):
         super().__init__(master)
+        self.scrollable_frame = None
         self.master = master
         self.master.title("Metro Efrei Dodo")
         self.screen_width = self.master.winfo_screenwidth()
@@ -466,53 +467,78 @@ class MetroAppUI(tk.Frame):
         self.quit_button.pack_forget()
         self.create_go_back_button(self.itinerary_frame)
 
+
+
+    def create_metro_line_button(self, station_id, station_name, is_it_depart):
+        metro_line_nbr = self.metro_graph.nodes[station_id]['ligne']
+        line_image_path, line_color = (self.metro_line_image[metro_line_nbr][0],
+                                       self.metro_line_image[metro_line_nbr][1])
+        line_image = ctk.CTkImage(light_image=Image.open(line_image_path), size=(30, 30))
+
+        if is_it_depart:
+            fg_color = "black"
+
+        else:
+            fg_color = "#163767"
+        # Create station change button
+        station_change_button = ctk.CTkButton(
+            self.scrollable_frame,
+            text=station_name,
+            text_color="white",
+            image=line_image,
+            compound="left",
+            font=("Arial", 20),
+            fg_color= fg_color,
+            corner_radius=10,
+            border_width=2,
+            border_color="#377fbc",
+            width=10,
+            hover=False,
+            height=10
+        )
+        station_change_button.pack(anchor='center', pady=10, padx=(10, 10))
+
+        return line_color
+
+    def create_station_button(self, station_name):
+        button = ctk.CTkButton(
+            self.scrollable_frame,
+            text=station_name,
+            hover=False
+        )
+        button.pack(pady=2, anchor='center')
+
     def display_metro_line_images(self, total_weight, path):
         # Remove existing itinerary widgets from itinerary frame
         for widget in self.itinerary_frame.winfo_children():
             if not isinstance(widget, ctk.CTkButton):  # Skip destroying the back button
                 widget.destroy()
 
-        self.itinerary_label = None
+        self.scrollable_frame = ctk.CTkScrollableFrame(self.itinerary_frame, width=400, height=200)
 
-        # Prepare itinerary text
-        itinerary_text = f"Shortest path from {self.src_entry.get()} to {self.des_entry.get()}:\n\n"
-        self.itinerary_label = ctk.CTkLabel(self.itinerary_frame, text=itinerary_text, wraplength=500)
-        self.itinerary_label.pack(pady=20)
+        self.scrollable_frame.pack(side="left", fill="y", padx=20, pady=20)
 
-        for station_id, line_change in path:
+
+        for index, (station_id, line_change) in enumerate(path):
             station_name = self.metro_graph.nodes[station_id]['name']
-            station_label = ctk.CTkLabel(self.itinerary_frame, text=station_name, wraplength=500)
 
-            # Check if there's a metro line change (True)
-            if not line_change:
-                station_label.pack(anchor='w')
+            # if we are the station de depart
+            if station_id == path[0][0] or station_id == path[len(path)-1][0]:
 
-            # Check if there's a metro line change (True) to display the metro line image
-            if line_change:
-                metro_line_nbr = self.metro_graph.nodes[station_id]['ligne']
-                line_image_path, line_color = self.metro_line_image[metro_line_nbr][0], self.metro_line_image[metro_line_nbr][1]
-                line_image = ctk.CTkImage(light_image=Image.open(line_image_path), size=(30, 30))
-                # Create station change button
-                station_change_button = ctk.CTkButton(
-                    self.itinerary_frame,
-                    text=station_name,
-                    text_color="white",
-                    image=line_image,
-                    compound="left",
-                    font=("Arial", 20),
-                    fg_color="#163767",
-                    corner_radius=10,
-                    border_width=2,
-                    border_color="#377fbc",
-                    width=10,
-                    hover=False,
-                    height=10
-                )
-                station_change_button.pack(anchor='w', pady=10, padx=(10, 10))
+                line_color = self.create_metro_line_button(station_id, station_name, True)
+            else:
 
+                if not line_change:
+                    self.create_station_button(station_name)
+
+                # Check if there's a metro line change (True) to display the metro line image
+                if line_change:
+                    line_color = self.create_metro_line_button(station_id, station_name, False)
+
+        '''
         # Display total weight at the end
         total_weight_label = ctk.CTkLabel(self.itinerary_frame, text=f"Total Weight: {total_weight}")
-        total_weight_label.pack(anchor='w')
+        total_weight_label.pack(anchor='w')'''
 
         # Ensure the back button is packed back into self.control_frame
         self.quit_button.pack()
