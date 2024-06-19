@@ -1,7 +1,4 @@
 import time
-
-
-
 import networkx as nx
 import tkinter as tk
 import customtkinter as ctk

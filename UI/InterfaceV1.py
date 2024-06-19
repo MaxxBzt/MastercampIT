@@ -1,17 +1,15 @@
 import tkinter as tk
-
 import networkx as nx
 from PIL import Image, ImageTk
 import pandas as pd
 import os
 import customtkinter as ctk
 from matplotlib import pyplot as plt
-
 from Data.ExtractData import dataversion1
 from Graph.checkgraph import findACPM_Prim
 from Graph.shortestpath import dijkstra
 from unidecode import unidecode
-
+from calc import carbon_saved
 
 
 
@@ -374,6 +372,21 @@ class MetroAppUI(tk.Frame):
         )
         acpm_button.pack(anchor='w', pady=10, padx=(10, 10))
 
+        co2_button = ctk.CTkButton(
+            self.control_frame,
+            text="Calculer le CO2 économisé",
+            command=self.calculate_carbon_footprint,
+            text_color="white",
+            font=("Arial", 20),
+            fg_color="#008000",  # Button background color
+            hover_color="#0BB00B",  # Button color when hovered
+            corner_radius=10,  # Rounded corners
+            border_width=2,  # Border width
+            width=250,  # Adjusted width
+            height=50  # Adjusted height
+        )
+        co2_button.pack(anchor='w', pady=10, padx=(10, 10))
+
     def set_station_as_destination(self, station_name):
         """Set a specific station as the destination."""
         self.des_entry.delete(0, tk.END)
@@ -426,8 +439,14 @@ class MetroAppUI(tk.Frame):
         print(shortest_path[0])
         print("The duration of the shortest path is:")
         print(shortest_path[1] // 60, "minutes", shortest_path[1] % 60, "secondes")
+        return shortest_path
 
     def button_clicked(self):
         print("Calculate button clicked")
-
-
+    
+    def calculate_carbon_footprint(self):
+        itinerary = self.calculate_itinerary()
+        time_in_seconds =itinerary[1]
+        co2_difference = carbon_saved(time_in_seconds)
+        print(f"CO2 saved by taking the metro: {co2_difference} g")
+        
