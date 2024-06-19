@@ -19,7 +19,7 @@ class MetroAppUI(tk.Frame):
     def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None):
         super().__init__(master)
         self.master = master
-        self.master.title("Metro App")
+        self.master.title("Metro Efrei Dodo")
         self.screen_width = self.master.winfo_screenwidth()
         self.screen_height = self.master.winfo_screenheight()
         self.points_txt = points_txt
@@ -46,6 +46,8 @@ class MetroAppUI(tk.Frame):
 
         self.points_data = self.load_points()
 
+
+
     ''' UI UTILITARY FUNCTIONS -- functions useful in the UI interface '''
 
     def find_station_id(self, event):
@@ -68,6 +70,8 @@ class MetroAppUI(tk.Frame):
                 self.result_label2.configure(text="Selected station: " + station_name)
         else:
             print("Vous avez cliqué sur un point inconnu.")
+
+        self.update_calc_button_state()
 
         # data=True get us : (node, node_attribute_dict)
         #        node = the node ID & node_attribute_dict a dictionary of the node's attributes
@@ -96,6 +100,11 @@ class MetroAppUI(tk.Frame):
          fg_color="red", command=self.master.destroy, hover_color="crimson")
         self.quit.pack(side="bottom", pady=10)
 
+    def create_go_back_button(self):
+        self.go_back_button = ctk.CTkButton(self.control_frame, text="Go back", width=250, height=50,
+                                            fg_color="blue", command=self.go_back, hover_color="navy")
+        self.go_back_button.pack(side="bottom", pady=10)
+
 
     ''' UI MANDATORY FUNCTIONS -- functions that do big things in UI '''
 
@@ -123,7 +132,11 @@ class MetroAppUI(tk.Frame):
         self.canvas.bind('<Configure>', self.show_full_image)
 
         self.create_quit_button()
+        # Buttons
+        self.calc_button = None
         self.create_input_controls()
+        self.update_calc_button_state()
+
 
     def init_image_display(self):
         # Open the original image stored in data
@@ -199,6 +212,12 @@ class MetroAppUI(tk.Frame):
             self.canvas.tag_bind(point, "<Button-1>", self.find_station_id)
             self.canvas.tag_bind(point, "<Enter>", self.on_enter)
             self.canvas.tag_bind(point, "<Leave>", self.on_leave)
+
+    def update_calc_button_state(self):
+        if self.selected_station_depart_id is not None and self.selected_station_arrive_id is not None:
+            self.calc_button.configure(state="normal")
+        else:
+            self.calc_button.configure(state="disabled")
 
     def on_enter(self, event):
         # Change the color of the point to indicate that it is being hovered over
@@ -280,6 +299,7 @@ class MetroAppUI(tk.Frame):
                 self.selected_station_arrive_id = self.get_station_id_from_name(selected_station)
                 self.result_label2.configure(text="Selected station: " + selected_station)
             self.dropdown_menu_arrive.pack_forget()
+        self.update_calc_button_state()
 
     def create_input_controls(self):
         # Configure appearance
@@ -342,7 +362,7 @@ class MetroAppUI(tk.Frame):
         self.dropdown_menu_arrive.bind("<<ListboxSelect>>", self.on_dropdown_select)
 
         # Calculate button
-        calc_button = ctk.CTkButton(
+        self.calc_button = ctk.CTkButton(
             self.control_frame,
             text="Calculer l'itinéraire",
             command=self.calculate_itinerary,
@@ -354,9 +374,10 @@ class MetroAppUI(tk.Frame):
             border_width=2,  # Border width
             border_color="#1D4ED8",  # Border color
             width=250,  # Adjusted width
-            height=50  # Adjusted height
+            height=50,  # Adjusted height
+            state = "disabled"
         )
-        calc_button.pack(anchor='w', pady=10, padx=(10, 10))
+        self.calc_button.pack(anchor='w', pady=10, padx=(10, 10))
 
         acpm_button = ctk.CTkButton(
             self.control_frame,
@@ -380,6 +401,8 @@ class MetroAppUI(tk.Frame):
         self.des_entry.insert(0, station_name)
         self.selected_station_arrive_id = self.get_station_id_from_name(station_name)
         self.result_label2.configure(text="Selected station: " + station_name)
+
+        self.update_calc_button_state()
 
 
     def show_acpm_tree(self):
