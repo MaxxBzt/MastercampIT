@@ -155,8 +155,8 @@ class MetroAppUI(tk.Frame):
             new_height = int(new_width / self.image_ratio)
 
         # Resize image
-        resized_image = self.image_original.resize((new_width, new_height), Image.LANCZOS)
-        self.img = ImageTk.PhotoImage(resized_image)
+        self.resized_image = self.image_original.resize((new_width, new_height), Image.LANCZOS)
+        self.img = ImageTk.PhotoImage(self.resized_image)
 
         # Clear the canvas and place the resized image center
         self.canvas.delete("all")
@@ -528,40 +528,21 @@ class MetroAppUI(tk.Frame):
             if not isinstance(widget, ctk.CTkButton):  # Skip destroying the back button
                 widget.destroy()
 
-        # Create a blank image to draw the lines on
-        img = Image.new('RGBA', self.image_original.size, (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
+        self.total_weight_label = None
 
-        # Convert metro_graph to dictionary for quick lookup of node attributes
-        node_attrs = {node[0]: node[1] for node in self.metro_graph.nodes(data=True)}
+        # Convert total weight to hours and minutes
+        hours = total_weight // 3600
+        minutes = (total_weight % 3600) // 60
 
-        # Draw lines connecting stations in the shortest path
-        prev_station_id = None
-        for station_id, _, _ in path:
-            if prev_station_id is not None:
-                prev_station = node_attrs[prev_station_id]['name']
-                curr_station = node_attrs[station_id]['name']
-                prev_station_coords = self.get_station_coordinates(prev_station)
-                curr_station_coords = self.get_station_coordinates(curr_station)
-
-                if prev_station_coords and curr_station_coords:
-                    prev_x, prev_y = prev_station_coords
-                    curr_x, curr_y = curr_station_coords
-                    line_color = self.get_line_color(station_id)
-
-                    draw.line([(prev_x, prev_y), (curr_x, curr_y)], fill=line_color, width=5)
-
-            prev_station_id = station_id
-
-        # Display the image with colored lines
-        img = Image.alpha_composite(self.image_original.convert('RGBA'), img)
-        self.img = ImageTk.PhotoImage(img)
-        self.canvas.create_image(
-            self.canvas.winfo_width() // 2,
-            self.canvas.winfo_height() // 2,
-            anchor='center',
-            image=self.img
-        )
+        # Display total weight in hours and minutes only if hours > 0
+        if hours > 0:
+            total_weight_label = ctk.CTkLabel(self.itinerary_frame, text=f"Time taken: {hours} hours {minutes} minutes",
+                                           wraplength=200)
+            total_weight_label.pack(pady=20)
+        else:
+            total_weight_label = ctk.CTkLabel(self.itinerary_frame, text=f"Time taken: {minutes} minutes",
+                                              wraplength=200)
+            total_weight_label.pack(pady=20)
 
         self.scrollable_frame = ctk.CTkScrollableFrame(self.itinerary_frame, width=400, height=200)
 
@@ -583,6 +564,7 @@ class MetroAppUI(tk.Frame):
                 if line_change:
                     line_color = self.create_metro_line_button(station_id, station_name, False, station_nbr)
 
+
         '''
         # Display total weight at the end
         total_weight_label = ctk.CTkLabel(self.itinerary_frame, text=f"Total Weight: {total_weight}")
@@ -590,6 +572,7 @@ class MetroAppUI(tk.Frame):
 
         # Ensure the back button is packed back into self.control_frame
         self.quit_button.pack()
+
 
 
     def calculate_itinerary(self):
@@ -623,6 +606,7 @@ class MetroAppUI(tk.Frame):
 
         # Recreate the original buttons
         self.create_quit_button(self.control_frame)
+
 
     def clear_travel(self):
         self.selected_station_depart_id = None
