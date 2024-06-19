@@ -71,6 +71,7 @@ class MetroAppUI(tk.Frame):
         else:
             print("Vous avez cliqué sur un point inconnu.")
 
+        # this update the calculate itinerary button to make it disabled or not when necessary
         self.update_calc_button_state()
 
         # data=True get us : (node, node_attribute_dict)
@@ -135,6 +136,7 @@ class MetroAppUI(tk.Frame):
         # Buttons
         self.calc_button = None
         self.create_input_controls()
+        # this update the calculate itinerary button to make it disabled or not when necessary
         self.update_calc_button_state()
 
 
@@ -299,6 +301,8 @@ class MetroAppUI(tk.Frame):
                 self.selected_station_arrive_id = self.get_station_id_from_name(selected_station)
                 self.result_label2.configure(text="Selected station: " + selected_station)
             self.dropdown_menu_arrive.pack_forget()
+
+        # this update the calculate itinerary button to make it disabled or not when necessary
         self.update_calc_button_state()
 
     def create_input_controls(self):
@@ -395,6 +399,23 @@ class MetroAppUI(tk.Frame):
         )
         acpm_button.pack(anchor='w', pady=10, padx=(10, 10))
 
+        clear_button = ctk.CTkButton(
+            self.control_frame,
+            text="Clear Travel",
+            command=self.clear_travel,
+            text_color="#FFFFFF",
+            font=("Arial", 14),
+            fg_color="#FF4500",
+            hover_color="#FF6347",
+            corner_radius=5,
+            border_width=1,
+            border_color="#FF4500",
+            width=120,
+            height=30
+        )
+        clear_button.pack(anchor='w', pady=5, padx=(10, 10))
+
+
     def set_station_as_destination(self, station_name):
         """Set a specific station as the destination."""
         self.des_entry.delete(0, tk.END)
@@ -402,6 +423,7 @@ class MetroAppUI(tk.Frame):
         self.selected_station_arrive_id = self.get_station_id_from_name(station_name)
         self.result_label2.configure(text="Selected station: " + station_name)
 
+        # this update the calculate itinerary button to make it disabled or not when necessary
         self.update_calc_button_state()
 
 
@@ -452,5 +474,18 @@ class MetroAppUI(tk.Frame):
 
     def button_clicked(self):
         print("Calculate button clicked")
+
+    def clear_travel(self):
+        self.selected_station_depart_id = None
+        self.selected_station_arrive_id = None
+        self.selecting_departure = True
+
+        self.src_entry.configure(textvariable="")
+        self.des_entry.configure(textvariable="")
+
+        self.result_label.configure(text="")
+        self.result_label2.configure(text="")
+
+        self.update_calc_button_state()
 
 
