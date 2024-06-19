@@ -1,13 +1,13 @@
 import tkinter as tk
 
 import networkx as nx
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw
 import pandas as pd
 import os
 import customtkinter as ctk
 from matplotlib import pyplot as plt
 
-from Data.ExtractData import dataversion1
+from Data.ExtractData import dataversion1, merge_stations
 from Graph.checkgraph import findACPM_Prim
 from Graph.shortestpath import dijkstra
 from unidecode import unidecode
@@ -94,12 +94,12 @@ class MetroAppUI(tk.Frame):
 
     ''' UI CREATE BUTTONS FUNCTIONS '''
 
-    def create_go_back_button(self,frame):
+    def create_go_back_button(self, frame):
         self.go_back_button = ctk.CTkButton(frame, text="Go back", width=250, height=50,
                                             fg_color="blue", command=self.go_back, hover_color="navy")
         self.go_back_button.pack(side="bottom", pady=10)
 
-    def create_quit_button(self,frame):
+    def create_quit_button(self, frame):
         self.quit_button = ctk.CTkButton(frame, text="Quit the app", width=250,
                                          height=50, fg_color="red", command=self.master.destroy, hover_color="crimson")
         self.quit_button.pack(side="bottom", pady=10)
@@ -177,6 +177,12 @@ class MetroAppUI(tk.Frame):
         offset_y = (canvas_height - new_height) // 2
 
         processed_stations = set()
+
+        datapointmerge = merge_stations(self.metro_graph)
+
+        # Draw points on canvas
+        for node in datapointmerge.nodes(data=True):
+            station = node[1]['name']
 
         # Draw points on canvas
         for node in self.metro_graph.nodes(data=True):
@@ -467,12 +473,10 @@ class MetroAppUI(tk.Frame):
         self.quit_button.pack_forget()
         self.create_go_back_button(self.itinerary_frame)
 
-
-
-    def create_metro_line_button(self, station_id, station_name, is_it_depart):
-        metro_line_nbr = self.metro_graph.nodes[station_id]['ligne']
-        line_image_path, line_color = (self.metro_line_image[metro_line_nbr][0],
-                                       self.metro_line_image[metro_line_nbr][1])
+    def create_metro_line_button(self, station_id, station_name, is_it_depart, station_nbr):
+        station_nbr = self.metro_graph.nodes[station_id]['ligne']
+        line_image_path, line_color = (self.metro_line_image[station_nbr][0],
+                                       self.metro_line_image[station_nbr][1])
         line_image = ctk.CTkImage(light_image=Image.open(line_image_path), size=(30, 30))
 
         if is_it_depart:
@@ -488,10 +492,10 @@ class MetroAppUI(tk.Frame):
             image=line_image,
             compound="left",
             font=("Arial", 20),
-            fg_color= fg_color,
+            fg_color=fg_color,
             corner_radius=10,
             border_width=2,
-            border_color="#377fbc",
+            border_color=fg_color,
             width=10,
             hover=False,
             height=10
@@ -508,24 +512,68 @@ class MetroAppUI(tk.Frame):
         )
         button.pack(pady=2, anchor='center')
 
+    def get_station_coordinates(self, station_name):
+        for point_id, (x, y, name) in self.coord_dict.items():
+            if name == station_name:
+                return x, y
+        return None
+
+    def get_line_color(self, station_id):
+        station_nbr = self.metro_graph.nodes[station_id]['ligne']
+        return self.metro_line_image.get(station_nbr, ("", ""))[1]
+
     def display_metro_line_images(self, total_weight, path):
         # Remove existing itinerary widgets from itinerary frame
         for widget in self.itinerary_frame.winfo_children():
             if not isinstance(widget, ctk.CTkButton):  # Skip destroying the back button
                 widget.destroy()
 
+        # Create a blank image to draw the lines on
+        img = Image.new('RGBA', self.image_original.size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+
+        # Convert metro_graph to dictionary for quick lookup of node attributes
+        node_attrs = {node[0]: node[1] for node in self.metro_graph.nodes(data=True)}
+
+        # Draw lines connecting stations in the shortest path
+        prev_station_id = None
+        for station_id, _, _ in path:
+            if prev_station_id is not None:
+                prev_station = node_attrs[prev_station_id]['name']
+                curr_station = node_attrs[station_id]['name']
+                prev_station_coords = self.get_station_coordinates(prev_station)
+                curr_station_coords = self.get_station_coordinates(curr_station)
+
+                if prev_station_coords and curr_station_coords:
+                    prev_x, prev_y = prev_station_coords
+                    curr_x, curr_y = curr_station_coords
+                    line_color = self.get_line_color(station_id)
+
+                    draw.line([(prev_x, prev_y), (curr_x, curr_y)], fill=line_color, width=5)
+
+            prev_station_id = station_id
+
+        # Display the image with colored lines
+        img = Image.alpha_composite(self.image_original.convert('RGBA'), img)
+        self.img = ImageTk.PhotoImage(img)
+        self.canvas.create_image(
+            self.canvas.winfo_width() // 2,
+            self.canvas.winfo_height() // 2,
+            anchor='center',
+            image=self.img
+        )
+
         self.scrollable_frame = ctk.CTkScrollableFrame(self.itinerary_frame, width=400, height=200)
 
         self.scrollable_frame.pack(side="left", fill="y", padx=20, pady=20)
 
-
-        for index, (station_id, line_change) in enumerate(path):
+        for (station_id, line_change, station_nbr) in path:
             station_name = self.metro_graph.nodes[station_id]['name']
 
             # if we are the station de depart
-            if station_id == path[0][0] or station_id == path[len(path)-1][0]:
+            if station_id == path[0][0] or station_id == path[len(path) - 1][0]:
 
-                line_color = self.create_metro_line_button(station_id, station_name, True)
+                line_color = self.create_metro_line_button(station_id, station_name, True, station_nbr)
             else:
 
                 if not line_change:
@@ -533,7 +581,7 @@ class MetroAppUI(tk.Frame):
 
                 # Check if there's a metro line change (True) to display the metro line image
                 if line_change:
-                    line_color = self.create_metro_line_button(station_id, station_name, False)
+                    line_color = self.create_metro_line_button(station_id, station_name, False, station_nbr)
 
         '''
         # Display total weight at the end
@@ -542,6 +590,7 @@ class MetroAppUI(tk.Frame):
 
         # Ensure the back button is packed back into self.control_frame
         self.quit_button.pack()
+
 
     def calculate_itinerary(self):
         # Hide the main layout

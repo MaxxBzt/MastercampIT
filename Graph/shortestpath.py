@@ -58,20 +58,21 @@ def dijkstra(graph, start, end):
         # Initialize result list for path with line change information
         path_with_line_change = []
 
-        # Mark nodes where there is a change in metro lines
-        for i in range(len(path)):
-            current_node = path[i]
-            if i == 0:
-                path_with_line_change.append((current_node, False))  # Starting point, no change initially
-            else:
-                previous_node = path[i - 1]
-                current_line = graph.nodes[current_node]['ligne']
-                previous_line = graph.nodes[previous_node]['ligne']
+    # Mark nodes where there is a change in metro lines
+    for i in range(len(path)):
+        current_node = path[i]
+        if i == 0:
+            path_with_line_change.append((current_node, False, graph.nodes[current_node]['ligne']))  # Starting point, no change initially
+        else:
+            previous_node = path[i - 1]
+            current_line = graph.nodes[current_node]['ligne']
+            previous_line = graph.nodes[previous_node]['ligne']
 
-                if current_line != previous_line:
-                    path_with_line_change.append((current_node, True))
-                else:
-                    path_with_line_change.append((current_node, False))
+            if current_line != previous_line:
+                path_with_line_change.append((current_node, True, graph.nodes[current_node]['ligne']))
+            else:
+                path_with_line_change.append((current_node, False, graph.nodes[current_node]['ligne']))
 
     return path_with_line_change, duree
+
 
