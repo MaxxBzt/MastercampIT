@@ -7,6 +7,7 @@ import tkinter as tk
 import customtkinter as ctk
 from UI.InterfaceV1 import MetroAppUI
 from Data.ExtractData import dataversion1, dataversion2
+from Data.utilities import metro_lines_info
 
 
 
@@ -31,7 +32,7 @@ def start_app(version, app):
 
     # Create a new instance of MetroAppUI with the selected data version
     root = tk.Tk()
-    MetroAppUI(master=root, image_path=metro_image_path, points_txt=file_path, metro_graph=metro_graph).mainloop()
+    MetroAppUI(master=root, image_path=metro_image_path, points_txt=file_path, metro_graph=metro_graph, metro_line_image=metro_lines_info).mainloop()
 
 
 def choose_data_menu():
