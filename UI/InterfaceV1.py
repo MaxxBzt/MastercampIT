@@ -13,8 +13,6 @@ from Graph.shortestpath import dijkstra
 from unidecode import unidecode
 
 
-
-
 class MetroAppUI(tk.Frame):
     def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None):
         super().__init__(master)
@@ -28,8 +26,6 @@ class MetroAppUI(tk.Frame):
         self.selected_station_arrive_id = None
         self.selected_station_depart_id = None
         self.selecting_departure = True  # Indicator for which station the user is selecting
-
-
 
         # dictionary that will remember which point is linked to which coordinates
         self.coord_dict = {}
@@ -45,8 +41,6 @@ class MetroAppUI(tk.Frame):
         self.init_image_display()
 
         self.points_data = self.load_points()
-
-
 
     ''' UI UTILITARY FUNCTIONS -- functions useful in the UI interface '''
 
@@ -89,23 +83,24 @@ class MetroAppUI(tk.Frame):
 
     def set_selecting_arrival(self):
         self.selecting_departure = False
+
     def get_station_id_from_name(self, station_name):
         for node in self.metro_graph.nodes(data=True):
             if node[1]['name'] == station_name:
                 return node[0]
         return None  # Return None if station name not found
 
-    def create_quit_button(self):
-        self.quit = ctk.CTkButton(self.control_frame, text="Quit the app",width=250,  # Adjusted width
-            height=50,  # Adjusted height
-         fg_color="red", command=self.master.destroy, hover_color="crimson")
-        self.quit.pack(side="bottom", pady=10)
+    ''' UI CREATE BUTTONS FUNCTIONS '''
 
-    def create_go_back_button(self):
-        self.go_back_button = ctk.CTkButton(self.control_frame, text="Go back", width=250, height=50,
+    def create_go_back_button(self,frame):
+        self.go_back_button = ctk.CTkButton(frame, text="Go back", width=250, height=50,
                                             fg_color="blue", command=self.go_back, hover_color="navy")
         self.go_back_button.pack(side="bottom", pady=10)
 
+    def create_quit_button(self,frame):
+        self.quit_button = ctk.CTkButton(frame, text="Quit the app", width=250,
+                                         height=50, fg_color="red", command=self.master.destroy, hover_color="crimson")
+        self.quit_button.pack(side="bottom", pady=10)
 
     ''' UI MANDATORY FUNCTIONS -- functions that do big things in UI '''
 
@@ -132,13 +127,12 @@ class MetroAppUI(tk.Frame):
         self.canvas.pack(fill="both", expand=True)
         self.canvas.bind('<Configure>', self.show_full_image)
 
-        self.create_quit_button()
+        self.create_quit_button(self.control_frame)
         # Buttons
         self.calc_button = None
         self.create_input_controls()
         # this update the calculate itinerary button to make it disabled or not when necessary
         self.update_calc_button_state()
-
 
     def init_image_display(self):
         # Open the original image stored in data
@@ -336,7 +330,7 @@ class MetroAppUI(tk.Frame):
         self.des_entry.bind("<KeyRelease>", lambda event: self.on_des_entry_change(self.des_entry))
         self.des_entry.bind("<FocusIn>", lambda event: self.set_selecting_arrival())
         icon = ctk.CTkImage(light_image=Image.open("Version1/LOGO_EFREI-WEB_blanc.png"),
-                                          size=(30, 30))
+                            size=(30, 30))
 
         set_station_button = ctk.CTkButton(
             self.control_frame,
@@ -378,7 +372,7 @@ class MetroAppUI(tk.Frame):
             border_color="#1D4ED8",  # Border color
             width=250,  # Adjusted width
             height=50,  # Adjusted height
-            state = "disabled"
+            state="disabled"
         )
         self.calc_button.pack(anchor='w', pady=10, padx=(10, 10))
 
@@ -414,7 +408,6 @@ class MetroAppUI(tk.Frame):
         )
         clear_button.pack(anchor='w', pady=5, padx=(10, 10))
 
-
     def set_station_as_destination(self, station_name):
         """Set a specific station as the destination."""
         self.des_entry.delete(0, tk.END)
@@ -424,7 +417,6 @@ class MetroAppUI(tk.Frame):
 
         # this update the calculate itinerary button to make it disabled or not when necessary
         self.update_calc_button_state()
-
 
     def show_acpm_tree(self):
         ACPM = findACPM_Prim(self.metro_graph)
@@ -461,15 +453,72 @@ class MetroAppUI(tk.Frame):
 
         plt.show()
 
+    ''' UI --- CALCULTE ITINERARY '''
+
+    def create_itinerary_layout(self):
+
+        # Create a frame for the itinerary controls
+        self.itinerary_frame = ctk.CTkFrame(self.master)
+        self.itinerary_frame.pack(side="left", fill="y", padx=20, pady=20)
+
+        # Pack the "Quit the app" button into the itinerary frame
+        self.quit_button.pack_forget()
+        self.create_go_back_button(self.itinerary_frame)
 
 
+    def calculate_itinerary(self):
 
+        # We hide the main layout
+        self.control_frame.pack_forget()
+        self.quit_button.pack_forget()
+
+        # We call the new layout
+        self.create_itinerary_layout()
+        self.itinerary_label = None
+
+
+        # Display the selected itinerary details
+        path, total_weight = dijkstra(self.metro_graph, self.selected_station_depart_id,
+                                      self.selected_station_arrive_id)
+        itinerary_text = f"Shortest path from {self.src_entry.get()} to {self.des_entry.get()}:\n\n"
+        for station_id in path:
+            station_name = self.metro_graph.nodes[station_id]['name']
+            itinerary_text += f"{station_name}\n"
+
+        itinerary_text += f"\nTotal Weight: {total_weight}"
+
+        # Create or update itinerary label in the itinerary frame
+        if self.itinerary_label:
+            self.itinerary_label.configure(text=itinerary_text)
+        else:
+            self.itinerary_label = ctk.CTkLabel(self.itinerary_frame, text=itinerary_text, wraplength=500)
+            self.itinerary_label.pack(pady=20)
+
+
+    def go_back(self):
+        # Hide itinerary details
+        self.itinerary_frame.pack_forget()
+        self.clear_travel()
+
+        # Show the original controls
+        self.control_frame.pack(side="left", fill="y", padx=20, pady=20)
+
+        # Remove current "Go Back" and "Quit the app" buttons (if they exist)
+        if hasattr(self, 'go_back_button'):
+            self.go_back_button.pack_forget()
+        if hasattr(self, 'quit_button'):
+            self.quit_button.pack_forget()
+
+        # Recreate the original buttons
+        self.create_quit_button(self.control_frame)
+
+    '''  
     def calculate_itinerary(self):
         shortest_path = dijkstra(self.metro_graph, self.selected_station_depart_id, self.selected_station_arrive_id)
         print("The shortest path is:")
         print(shortest_path[0])
         print("The duration of the shortest path is:")
-        print(shortest_path[1] // 60, "minutes", shortest_path[1] % 60, "secondes")
+        print(shortest_path[1] // 60, "minutes", shortest_path[1] % 60, "secondes")'''
 
     def button_clicked(self):
         print("Calculate button clicked")
@@ -493,5 +542,3 @@ class MetroAppUI(tk.Frame):
         self.dropdown_menu_arrive.pack_forget()
 
         self.update_calc_button_state()
-
-
