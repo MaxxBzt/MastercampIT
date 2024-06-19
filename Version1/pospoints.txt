@@ -40,7 +40,6 @@
 304;364;Monceau
 329;342;Villiers
 353;316;Rome
-69;69;Nice
 385;309;Place@de@Clichy
 435;310;Blanche
 489;309;Pigalle
@@ -350,7 +349,7 @@
 878;559;Robespierre
 892;545;Croix@de@Chavaux
 906;530;Mairie@de@Montreuil
-48;768;Boulogne,@Pont@de@Saint-Cloud,@Rond@Point@Rhin@et@Danube
+48;768;Boulogne,@Pont@de@Saint-Cloud
 68;749;Boulogne,@Jean@Jaurès
 87;731;Porte@d'Auteuil
 116;715;Michel@Ange@Auteuil
