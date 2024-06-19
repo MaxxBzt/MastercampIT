@@ -504,12 +504,33 @@ class MetroAppUI(tk.Frame):
 
         return line_color
 
-    def create_station_button(self, station_name):
-        button = ctk.CTkButton(
-            self.scrollable_frame,
-            text=station_name,
-            hover=False
-        )
+    def create_station_button(self, station_name, next_is_line_change):
+
+        if next_is_line_change == "True":
+            button_text = f"Change line station at {station_name}"
+            button_color = "#7f7f7f"
+            button = ctk.CTkButton(
+                self.scrollable_frame,
+                text=button_text,
+                hover=False,
+                fg_color=button_color
+            )
+
+        elif next_is_line_change == "Endstation":
+            button_text = "You've arrived at destination."
+            button_color = "green"
+            button = ctk.CTkButton(
+                self.scrollable_frame,
+                text=button_text,
+                hover=False,
+                fg_color=button_color
+            )
+        else:
+            button = ctk.CTkButton(
+                self.scrollable_frame,
+                text=station_name,
+                hover=False,
+            )
         button.pack(pady=2, anchor='center')
 
     def get_station_coordinates(self, station_name):
@@ -548,27 +569,29 @@ class MetroAppUI(tk.Frame):
 
         self.scrollable_frame.pack(side="left", fill="y", padx=20, pady=20)
 
-        for (station_id, line_change, station_nbr) in path:
+        for i, (station_id, line_change, station_nbr) in enumerate(path):
             station_name = self.metro_graph.nodes[station_id]['name']
 
+            next_station_is_line_change = "False"
             # if we are the station de depart
             if station_id == path[0][0] or station_id == path[len(path) - 1][0]:
 
                 line_color = self.create_metro_line_button(station_id, station_name, True, station_nbr)
             else:
-
                 if not line_change:
-                    self.create_station_button(station_name)
+                    # if not a line change but the next station is a line change and has the same station name
+                    if i + 1 < len(path):
+                        next_station_id, next_line_change, _ = path[i + 1]
+                        next_station_name = self.metro_graph.nodes[next_station_id]['name']
+                        if next_line_change and next_station_name == station_name:
+                            next_station_is_line_change = "True"
+                            if next_station_name == self.metro_graph.nodes[self.selected_station_arrive_id]['name']:
+                                next_station_is_line_change = "Endstation"
+                    self.create_station_button(station_name, next_station_is_line_change)
 
                 # Check if there's a metro line change (True) to display the metro line image
                 if line_change:
                     line_color = self.create_metro_line_button(station_id, station_name, False, station_nbr)
-
-
-        '''
-        # Display total weight at the end
-        total_weight_label = ctk.CTkLabel(self.itinerary_frame, text=f"Total Weight: {total_weight}")
-        total_weight_label.pack(anchor='w')'''
 
         # Ensure the back button is packed back into self.control_frame
         self.quit_button.pack()
@@ -597,6 +620,9 @@ class MetroAppUI(tk.Frame):
 
         # Show the original controls
         self.control_frame.pack(side="left", fill="y", padx=20, pady=20)
+
+        self.des_entry.delete(0, tk.END)
+        self.src_entry.delete(0, tk.END)
 
         # Remove current "Go Back" and "Quit the app" buttons (if they exist)
         if hasattr(self, 'go_back_button'):
