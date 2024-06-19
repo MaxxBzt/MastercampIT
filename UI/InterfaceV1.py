@@ -14,7 +14,7 @@ from unidecode import unidecode
 
 
 class MetroAppUI(tk.Frame):
-    def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None):
+    def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None, metro_line_image=None):
         super().__init__(master)
         self.master = master
         self.master.title("Metro Efrei Dodo")
@@ -23,6 +23,7 @@ class MetroAppUI(tk.Frame):
         self.points_txt = points_txt
         self.image_path = image_path
         self.metro_graph = metro_graph
+        self.metro_line_image = metro_line_image
         self.selected_station_arrive_id = None
         self.selected_station_depart_id = None
         self.selecting_departure = True  # Indicator for which station the user is selecting
@@ -465,34 +466,71 @@ class MetroAppUI(tk.Frame):
         self.quit_button.pack_forget()
         self.create_go_back_button(self.itinerary_frame)
 
+    def display_metro_line_images(self, total_weight, path):
+        # Remove existing itinerary widgets from itinerary frame
+        for widget in self.itinerary_frame.winfo_children():
+            if not isinstance(widget, ctk.CTkButton):  # Skip destroying the back button
+                widget.destroy()
+
+        self.itinerary_label = None
+
+        # Prepare itinerary text
+        itinerary_text = f"Shortest path from {self.src_entry.get()} to {self.des_entry.get()}:\n\n"
+        self.itinerary_label = ctk.CTkLabel(self.itinerary_frame, text=itinerary_text, wraplength=500)
+        self.itinerary_label.pack(pady=20)
+
+        for station_id, line_change in path:
+            station_name = self.metro_graph.nodes[station_id]['name']
+            station_label = ctk.CTkLabel(self.itinerary_frame, text=station_name, wraplength=500)
+
+            # Check if there's a metro line change (True)
+            if not line_change:
+                station_label.pack(anchor='w')
+
+            # Check if there's a metro line change (True) to display the metro line image
+            if line_change:
+                metro_line_nbr = self.metro_graph.nodes[station_id]['ligne']
+                line_image_path, line_color = self.metro_line_image[metro_line_nbr][0], self.metro_line_image[metro_line_nbr][1]
+                line_image = ctk.CTkImage(light_image=Image.open(line_image_path), size=(30, 30))
+                # Create station change button
+                station_change_button = ctk.CTkButton(
+                    self.itinerary_frame,
+                    text=station_name,
+                    text_color="white",
+                    image=line_image,
+                    compound="left",
+                    font=("Arial", 20),
+                    fg_color="#163767",
+                    corner_radius=10,
+                    border_width=2,
+                    border_color="#377fbc",
+                    width=10,
+                    hover=False,
+                    height=10
+                )
+                station_change_button.pack(anchor='w', pady=10, padx=(10, 10))
+
+        # Display total weight at the end
+        total_weight_label = ctk.CTkLabel(self.itinerary_frame, text=f"Total Weight: {total_weight}")
+        total_weight_label.pack(anchor='w')
+
+        # Ensure the back button is packed back into self.control_frame
+        self.quit_button.pack()
 
     def calculate_itinerary(self):
-
-        # We hide the main layout
+        # Hide the main layout
         self.control_frame.pack_forget()
         self.quit_button.pack_forget()
 
-        # We call the new layout
+        # Call the new layout
         self.create_itinerary_layout()
-        self.itinerary_label = None
 
-        # Display the selected itinerary details
+        # calculate the shortest path
         path, total_weight = dijkstra(self.metro_graph, self.selected_station_depart_id,
                                       self.selected_station_arrive_id)
-        itinerary_text = f"Shortest path from {self.src_entry.get()} to {self.des_entry.get()}:\n\n"
-        for station_id in path:
-            station_name = self.metro_graph.nodes[station_id]['name']
-            itinerary_text += f"{station_name}\n"
 
-        itinerary_text += f"\nTotal Weight: {total_weight}"
-
-        # Create or update itinerary label in the itinerary frame
-        if self.itinerary_label:
-            self.itinerary_label.configure(text=itinerary_text)
-        else:
-            self.itinerary_label = ctk.CTkLabel(self.itinerary_frame, text=itinerary_text, wraplength=500)
-            self.itinerary_label.pack(pady=20)
-
+        # Display metro line images with station names and buttons
+        self.display_metro_line_images(total_weight, path)
 
     def go_back(self):
         # Hide itinerary details
