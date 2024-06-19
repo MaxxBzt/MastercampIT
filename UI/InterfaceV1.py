@@ -335,9 +335,8 @@ class MetroAppUI(tk.Frame):
         self.des_entry.pack(anchor='w', pady=15, padx=(10, 10))
         self.des_entry.bind("<KeyRelease>", lambda event: self.on_des_entry_change(self.des_entry))
         self.des_entry.bind("<FocusIn>", lambda event: self.set_selecting_arrival())
-        icon = Image.open("Version1/LOGO_EFREI-WEB_blanc.png")
-        icon = icon.resize((30, 30))
-        icon = ImageTk.PhotoImage(icon)
+        icon = ctk.CTkImage(light_image=Image.open("Version1/LOGO_EFREI-WEB_blanc.png"),
+                                          size=(30, 30))
 
         set_station_button = ctk.CTkButton(
             self.control_frame,
@@ -480,11 +479,18 @@ class MetroAppUI(tk.Frame):
         self.selected_station_arrive_id = None
         self.selecting_departure = True
 
-        self.src_entry.configure(textvariable="")
-        self.des_entry.configure(textvariable="")
+        # Clear src_entry and des_entry
+        self.src_entry.delete(0, tk.END)
+        self.des_entry.delete(0, tk.END)
 
         self.result_label.configure(text="")
         self.result_label2.configure(text="")
+
+        # Clear dropdown menus and hide them
+        self.dropdown_menu_depart.delete(0, tk.END)
+        self.dropdown_menu_depart.pack_forget()
+        self.dropdown_menu_arrive.delete(0, tk.END)
+        self.dropdown_menu_arrive.pack_forget()
 
         self.update_calc_button_state()
 
