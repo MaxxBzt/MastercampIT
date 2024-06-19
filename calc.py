@@ -16,4 +16,4 @@ def carbon_saved(time_in_seconds):
 
     co2_difference = abs(car_co2 - metro_co2)
 
-    return co2_difference
+    return round(co2_difference,3)
