@@ -335,7 +335,7 @@ class MetroAppUI(tk.Frame):
         set_station_button = ctk.CTkButton(
             self.control_frame,
             text="EFREI",
-            command=lambda: self.set_station_as_destination('Villejuif - Louis Aragon'),
+            command=lambda: self.set_station_as_destination('Villejuif, Louis Aragon'),
             text_color="white",
             image=icon,
             compound="left",
@@ -476,7 +476,6 @@ class MetroAppUI(tk.Frame):
         self.create_itinerary_layout()
         self.itinerary_label = None
 
-
         # Display the selected itinerary details
         path, total_weight = dijkstra(self.metro_graph, self.selected_station_depart_id,
                                       self.selected_station_arrive_id)
@@ -511,17 +510,6 @@ class MetroAppUI(tk.Frame):
 
         # Recreate the original buttons
         self.create_quit_button(self.control_frame)
-
-    '''  
-    def calculate_itinerary(self):
-        shortest_path = dijkstra(self.metro_graph, self.selected_station_depart_id, self.selected_station_arrive_id)
-        print("The shortest path is:")
-        print(shortest_path[0])
-        print("The duration of the shortest path is:")
-        print(shortest_path[1] // 60, "minutes", shortest_path[1] % 60, "secondes")'''
-
-    def button_clicked(self):
-        print("Calculate button clicked")
 
     def clear_travel(self):
         self.selected_station_depart_id = None
