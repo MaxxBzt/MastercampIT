@@ -68,7 +68,7 @@ def dataversion2():
 
     # We determine all the lines metro operated by the RATP thanks to routes.txt
     # Reminders : it's metro if the route_type is 1
-    file = open("Version2_Version3/data/routes.txt", "r")
+    file = open("../Version2_Version3/data/routes.txt", "r")
     metro_lines = {}
     # We don't take in consideration the first line
 
@@ -84,7 +84,7 @@ def dataversion2():
     directions = {}
 
     # We determine the directions for all lines thanks to trips_filtered.txt
-    file = open("Version2_Version3/data/trip_id_filtered.txt", "r", encoding="utf-8")
+    file = open("../Version2_Version3/data/trip_id_filtered.txt", "r", encoding="utf-8")
 
     # For each trip_id of the text trip_id_filtered.txt we determine the direction
     for line in file:
@@ -101,7 +101,7 @@ def dataversion2():
                 if not any(item[0] == line[3] for item in directions[value]):
                     directions[value].append([line[3], line[2]])
 
-    file = open("Version2_Version3/data/stop_times_filtered.txt", "r", encoding="utf-8")
+    file = open("../Version2_Version3/data/stop_times_filtered.txt", "r", encoding="utf-8")
 
     stops = {} # { 1 : [ trip 1 : [[stop_id, stop_name, line, time, wheelchair],[stop_id, stop_name, line, time, wheelchair]], trip 2 : [[....]], 2 : [[stop_id, stop_name, line, time, wheelchair],[stop_id, stop_name, line, time, wheelchair]]}
 
@@ -138,10 +138,10 @@ def dataversion2():
     for trip, stop in stops.items():
         for i in range(len(stop) - 1):
             if not G.has_node(stop[i][0]):
-                G.add_node(stop[i][0], name=stop[i][1], ligne=stop[i][2], branchement=0, wheelchair=stop[i][4],
+                G.add_node(stop[i][0], name=stop[i][1], ligne=stop[i][2], branchement=[], wheelchair=stop[i][4],
                            coordinates=tuple(map(float, stop[i][5])))
             if not G.has_node(stop[i + 1][0]):
-                G.add_node(stop[i + 1][0], name=stop[i + 1][1], ligne=stop[i + 1][2], branchement=0,
+                G.add_node(stop[i + 1][0], name=stop[i + 1][1], ligne=stop[i + 1][2], branchement=[],
                            wheelchair=stop[i + 1][4], coordinates=tuple(map(float, stop[i + 1][5])))
 
             # Store all the direction of the line
@@ -161,7 +161,7 @@ def dataversion2():
         # We are going to add the transfers
         # We determine the transfers thanks to transfers.txt
 
-    file = open("Version2_Version3/data/transfers.txt", "r", encoding="utf-8")
+    file = open("../Version2_Version3/data/transfers.txt", "r", encoding="utf-8")
 
 
     #Permet de connecter le graph
@@ -176,17 +176,15 @@ def dataversion2():
                 G.add_edge(line[0], line[1], name="transfer", duration=duration)
                 G.add_edge(line[1], line[0], name="transfer", duration=duration)
 
-    # if a node is connected to an another node which not belong to the same line, we increment the branchement attribute
+    # if a node is connected to an another node which not belong to the same line, we store the line number in the attribute branchement
     for node in G.nodes:
         for edge in G.edges:
             if edge[0] == node:
                 if G.nodes[edge[1]]['ligne'] != G.nodes[node]['ligne']:
-                    G.nodes[node]['branchement'] += 1
+                    if G.nodes[edge[1]]['ligne'] not in G.nodes[node]['branchement']:
+                        G.nodes[node]['branchement'].append(G.nodes[edge[1]]['ligne'])
 
     file.close()
-
-    # verify if the graph is directed
-    print(is_directed(G))
 
 
     for node in G.nodes:
@@ -226,7 +224,7 @@ def dataversion2():
 
 
 def searchstop(stop_id):
-    stops_file = open("Version2_Version3/data/stops.txt", "r")
+    stops_file = open("../Version2_Version3/data/stops.txt", "r")
     for stops in stops_file:
         stops = stops.split(",")
         if stops[0] == stop_id:
@@ -261,7 +259,7 @@ def time_difference(time1, time2):
 
 
 
-dataversion1()
+dataversion2()
 #test = dijkstra(dataversion1(), 1,25)
 #print(test)
 #print("The shortest path is:")
