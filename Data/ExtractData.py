@@ -37,10 +37,19 @@ def dataversion1():
             line = line.split()
             G.add_edge(int(line[1]), int(line[2]), duration=int(line[3]))
 
+    file.close()
+    print(G)
+    #print(G.nodes)
+    #print(G.edges)
+    for station_id, data in G.nodes(data=True):
+        print(f"Station ID: {station_id}, Name: {data['name']}, Metro Line: {data['ligne']}")
+
+    return G
+
+
+def merge_stations(G):
     # We need to merge the nodes with the same name
     nodes = list(G.nodes)
-
-
     i = 0
     while i < len(nodes):
         node = nodes[i]
@@ -53,14 +62,7 @@ def dataversion1():
                 break
         else:
             i += 1  # Only increment i if no nodes were merged in the inner loop
-
-    file.close()
-    print(G)
-    #print(G.nodes)
-    #print(G.edges)
-
     return G
-
 
 def dataversion2():
     # First we determine the RATP Agency thanks to agency.txt

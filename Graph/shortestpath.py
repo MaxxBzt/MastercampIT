@@ -10,7 +10,7 @@ def dijkstra(graph, start, end):
 
     # Crée une liste avec toutes les stations à explorer
     queue = list(graph.nodes)
-    print(queue)
+    #print(queue)
 
     while queue:
         # Tant qu'on a des stations à explorer
@@ -55,5 +55,24 @@ def dijkstra(graph, start, end):
     for i in range(len(path)-1):
         duree += graph[path[i]][path[i+1]]['duration']
 
-    return path, duree
+        # Initialize result list for path with line change information
+        path_with_line_change = []
+
+    # Mark nodes where there is a change in metro lines
+    for i in range(len(path)):
+        current_node = path[i]
+        if i == 0:
+            path_with_line_change.append((current_node, False, graph.nodes[current_node]['ligne']))  # Starting point, no change initially
+        else:
+            previous_node = path[i - 1]
+            current_line = graph.nodes[current_node]['ligne']
+            previous_line = graph.nodes[previous_node]['ligne']
+
+            if current_line != previous_line:
+                path_with_line_change.append((current_node, True, graph.nodes[current_node]['ligne']))
+            else:
+                path_with_line_change.append((current_node, False, graph.nodes[current_node]['ligne']))
+
+    return path_with_line_change, duree
+
 
