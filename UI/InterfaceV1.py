@@ -347,9 +347,9 @@ class MetroAppUI(tk.Frame):
             text_color="white",
             image=icon,
             compound="left",
-            font=("Arial", 20),
+            font=("Arial", 13),
             fg_color="#163767",  # Button background color
-            hover_color="#377fbc",  # Button color when hovered
+            hover_color="#4396e2",  # Button color when hovered
             corner_radius=10,  # Rounded corners
             border_width=2,  # Border width
             border_color="#377fbc",  # Border color
@@ -389,14 +389,11 @@ class MetroAppUI(tk.Frame):
             text="Voir l'ACPM",
             command=self.show_acpm_tree,
             text_color="white",
-            font=("Arial", 20),
             fg_color="#000000",
             hover_color="#4e4e4e",
             corner_radius=10,
             border_width=2,
-            border_color="#4e4e4e",
-            width=250,
-            height=50
+            border_color="#4e4e4e"
         )
         acpm_button.pack(anchor='w', pady=10, padx=(10, 10))
 
@@ -417,20 +414,7 @@ class MetroAppUI(tk.Frame):
         )
         clear_button.pack(anchor='w', pady=5, padx=(10, 10))
 
-        co2_button = ctk.CTkButton(
-            self.control_frame,
-            text="Calculer le CO2 économisé",
-            command=self.calculate_carbon_footprint,
-            text_color="white",
-            font=("Arial", 20),
-            fg_color="#008000",  # Button background color
-            hover_color="#0BB00B",  # Button color when hovered
-            corner_radius=10,  # Rounded corners
-            border_width=2,  # Border width
-            width=250,  # Adjusted width
-            height=50  # Adjusted height
-        )
-        co2_button.pack(anchor='w', pady=10, padx=(10, 10))
+
 
 
     def set_station_as_destination(self, station_name):
@@ -572,15 +556,32 @@ class MetroAppUI(tk.Frame):
         hours = total_weight // 3600
         minutes = (total_weight % 3600) // 60
 
+        clockicon = ctk.CTkImage(light_image=Image.open("assets/clock.png"), size=(15, 15))
+
         # Display total weight in hours and minutes only if hours > 0
         if hours > 0:
             total_weight_label = ctk.CTkLabel(self.itinerary_frame, text=f"Temps de trajet: {hours} hours {minutes} minutes",
-                                              wraplength=200)
-            total_weight_label.pack(pady=20)
+                                  wraplength=200, image=clockicon, compound="left", padx=5, width=150, height=30, font=("Arial",15))
+            total_weight_label.pack(pady=10)
         else:
             total_weight_label = ctk.CTkLabel(self.itinerary_frame, text=f"Temps de trajet: {minutes} minutes",
-                                              wraplength=200)
-            total_weight_label.pack(pady=20)
+                                              wraplength=200, image=clockicon, compound="left", padx=5, width=150, height=30, font=("Arial",15))
+            total_weight_label.pack(pady=10)
+
+            # Create a green label with icon to display CO2 saved
+            leaficon = ctk.CTkImage(light_image=Image.open("assets/feuille.png"), size=(15, 15))
+            text_CO2 = f"CO2 saved: {carbon_saved(total_weight)} g"
+
+            # Check the current appearance mode and adjust the background color
+            if ctk.get_appearance_mode() == "Dark":
+                bg_color = "#456442"  # Darker shade of green
+            else:
+                bg_color = "#67ef79"  # Original green color
+
+            co2_label = ctk.CTkLabel(self.itinerary_frame, text=text_CO2, wraplength=200, font=("Arial",15),
+                                     bg_color=bg_color, image=leaficon, compound="left", padx=5, width=150, height=30)
+            co2_label.pack(pady=5)
+
 
         self.scrollable_frame = ctk.CTkScrollableFrame(self.itinerary_frame, width=400, height=200)
 
@@ -625,6 +626,8 @@ class MetroAppUI(tk.Frame):
         # calculate the shortest path
         path, total_weight = dijkstra(self.metro_graph, self.selected_station_depart_id,
                                       self.selected_station_arrive_id)
+
+
 
         # Display metro line images with station names and buttons
         self.display_metro_line_images(total_weight, path)
@@ -701,10 +704,7 @@ class MetroAppUI(tk.Frame):
     def button_clicked(self):
         print("Calculate button clicked")
     
-    def calculate_carbon_footprint(self):
-        itinerary = self.calculate_itinerary()
-        time_in_seconds =itinerary[1]
-        co2_difference = carbon_saved(time_in_seconds)
-        print(f"CO2 saved by taking the metro: {co2_difference} g")
+
         
+
 

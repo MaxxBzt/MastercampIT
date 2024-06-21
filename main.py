@@ -69,6 +69,8 @@ def choose_data_menu():
                                 wraplength=250, anchor="nw", justify="left")
     description1.grid(row=1, column=0, padx=20, pady=5, sticky="nsew")
 
+
+
     # Create Version 2 button and description
     button2 = ctk.CTkButton(frame, text="Version 2", command=lambda: start_app("Version 2", app))
     # button2 = ctk.CTkButton(frame, text="Version 2", command=test_callback)  # Temporary test callback

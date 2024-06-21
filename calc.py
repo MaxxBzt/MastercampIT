@@ -2,8 +2,8 @@ def carbon_saved(time_in_seconds):
 
     time_in_hours = time_in_seconds / 3600
 
-    car_speed = 20
-    metro_speed = 27
+    car_speed = 20 #km/h
+    metro_speed = 27 #km/h
 
     car_distance = car_speed * time_in_hours
     metro_distance = metro_speed * time_in_hours
