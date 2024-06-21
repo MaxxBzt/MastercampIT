@@ -1,5 +1,4 @@
 import tkinter as tk
-
 import networkx as nx
 from PIL import Image, ImageTk, ImageDraw
 import pandas as pd
@@ -8,10 +7,11 @@ import customtkinter as ctk
 from matplotlib import pyplot as plt
 
 from Data.ExtractData import dataversion1, merge_stations
+
 from Graph.checkgraph import findACPM_Prim
 from Graph.shortestpath import dijkstra
 from unidecode import unidecode
-
+from calc import carbon_saved
 
 class MetroAppUI(tk.Frame):
     def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None, metro_line_image=None):
@@ -400,6 +400,7 @@ class MetroAppUI(tk.Frame):
         )
         acpm_button.pack(anchor='w', pady=10, padx=(10, 10))
 
+
         clear_button = ctk.CTkButton(
             self.control_frame,
             text="Réinitialiser l'itinéraire",
@@ -415,6 +416,22 @@ class MetroAppUI(tk.Frame):
             height=30
         )
         clear_button.pack(anchor='w', pady=5, padx=(10, 10))
+
+        co2_button = ctk.CTkButton(
+            self.control_frame,
+            text="Calculer le CO2 économisé",
+            command=self.calculate_carbon_footprint,
+            text_color="white",
+            font=("Arial", 20),
+            fg_color="#008000",  # Button background color
+            hover_color="#0BB00B",  # Button color when hovered
+            corner_radius=10,  # Rounded corners
+            border_width=2,  # Border width
+            width=250,  # Adjusted width
+            height=50  # Adjusted height
+        )
+        co2_button.pack(anchor='w', pady=10, padx=(10, 10))
+
 
     def set_station_as_destination(self, station_name):
         """Set a specific station as the destination."""
@@ -597,6 +614,7 @@ class MetroAppUI(tk.Frame):
         self.quit_button.pack()
 
     def calculate_itinerary(self):
+
         # Hide the main layout
         self.control_frame.pack_forget()
         self.quit_button.pack_forget()
@@ -672,3 +690,21 @@ class MetroAppUI(tk.Frame):
 
         # Update the state of the calculate itinerary button
         self.update_calc_button_state()
+
+        shortest_path = dijkstra(self.metro_graph, self.selected_station_depart_id, self.selected_station_arrive_id)
+        print("The shortest path is:")
+        print(shortest_path[0])
+        print("The duration of the shortest path is:")
+        print(shortest_path[1] // 60, "minutes", shortest_path[1] % 60, "secondes")
+        return shortest_path
+
+    def button_clicked(self):
+        print("Calculate button clicked")
+    
+    def calculate_carbon_footprint(self):
+        itinerary = self.calculate_itinerary()
+        time_in_seconds =itinerary[1]
+        co2_difference = carbon_saved(time_in_seconds)
+        print(f"CO2 saved by taking the metro: {co2_difference} g")
+        
+
