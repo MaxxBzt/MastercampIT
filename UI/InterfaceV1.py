@@ -353,8 +353,8 @@ class MetroAppUI(tk.Frame):
             corner_radius=10,  # Rounded corners
             border_width=2,  # Border width
             border_color="#377fbc",  # Border color
-            width=150,  # Adjusted width
-            height=50  # Adjusted height
+            width=80,  # Adjusted width
+            height=25  # Adjusted height
         )
         set_station_button.pack(anchor='w', pady=10, padx=(10, 10))
 
