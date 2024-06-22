@@ -3,12 +3,18 @@ from PIL import Image, ImageTk
 import pandas as pd
 import os
 import customtkinter as ctk
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from pyvis.network import Network
+from pywin.Demos.ocx import webbrowser
 from Graph.shortestpath import dijkstra
 from unidecode import unidecode
+import mplcursors
+import networkx as nx
 
 
 
-class MetroAppUI(tk.Frame):
+class MetroAppUIV2(tk.Frame):
     def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None):
         super().__init__(master)
         self.master = master
@@ -56,6 +62,38 @@ class MetroAppUI(tk.Frame):
                 break
         else:
             print("La station ", station_name, "n'a pas été trouvée.")
+
+
+    def display_graph(self):
+        # Create a dictionary of positions using the 'pos' attribute of the nodes
+        pos = {node: data['coordinates'] for node, data in self.metro_graph.nodes(data=True)}
+
+        # Create a list of node ids in the same order as they are drawn on the matplotlib plot
+        node_ids = list(self.metro_graph.nodes)
+
+        # Create a matplotlib figure with specified size
+        fig, ax = plt.subplots()
+
+        # Draw only the nodes on the figure with smaller size, using the positions from the 'pos' dictionary
+        nodes = nx.draw_networkx_nodes(self.metro_graph, pos=pos, ax=ax, node_size=25)  # Adjust node_size as needed
+
+        # Create a FigureCanvasTkAgg object and attach it to the canvas_frame
+        canvas = FigureCanvasTkAgg(fig, master=self.canvas_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+        # Use mplcursors to add interactivity
+        crs = mplcursors.cursor(nodes, hover=True)
+
+        def on_add(sel):
+            node_id = node_ids[sel.target.index]
+            if node_id in self.metro_graph:
+                node_data = self.metro_graph.nodes[node_id]
+                print(node_data)  # Print the entire node data
+                sel.annotation.set_text(node_data['name'])
+
+        crs.connect("add", on_add)  # Connect the on_add function to the cursor
+
 
     def get_station_id_from_name(self, station_name):
         for node in self.metro_graph.nodes(data=True):
@@ -291,3 +329,5 @@ class MetroAppUI(tk.Frame):
 
     def button_clicked(self):
         print("Calculate button clicked")
+
+
