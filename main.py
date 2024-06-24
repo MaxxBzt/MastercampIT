@@ -29,7 +29,7 @@ def start_app(version, app):
 
     # Create a new instance of MetroAppUI with the selected data version
     root = tk.Tk()
-    MetroAppUI(master=root, image_path=metro_image_path, points_txt=file_path, metro_graph=metro_graph, metro_line_image=metro_lines_info).mainloop()
+    MetroAppUIV1(master=root, image_path=metro_image_path, points_txt=file_path, metro_graph=metro_graph, metro_line_image=metro_lines_info).mainloop()
 
 
 def choose_data_menu():
