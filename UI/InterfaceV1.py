@@ -13,10 +13,10 @@ from Graph.shortestpath import dijkstra
 from unidecode import unidecode
 from calc import carbon_saved
 
+
 class MetroAppUI(tk.Frame):
     def __init__(self, master=None, image_path=None, points_txt=None, metro_graph=None, metro_line_image=None):
         super().__init__(master)
-        self.scrollable_frame = None
         self.master = master
         self.master.title("Metro, Efrei, Dodo")
         self.screen_width = self.master.winfo_screenwidth()
@@ -25,6 +25,16 @@ class MetroAppUI(tk.Frame):
         self.image_path = image_path
         self.metro_graph = metro_graph
         self.metro_line_image = metro_line_image
+
+        # Initialization of class variable
+        self.image_original = None
+        self.calc_button = None
+        self.control_frame = None
+        self.quit_button = None
+        self.go_back_button = None
+        self.itinerary_frame = None
+        self.src_entry = None
+        self.scrollable_frame = None
         self.selected_station_arrive_id = None
         self.selected_station_depart_id = None
         self.selecting_departure = True  # Indicator for which station the user is selecting
@@ -58,12 +68,12 @@ class MetroAppUI(tk.Frame):
                 self.src_entry.delete(0, tk.END)
                 self.src_entry.insert(0, station_name)
                 self.selected_station_depart_id = self.get_station_id_from_name(station_name)
-                self.result_label.configure(text="Selected station: " + station_name)
+                self.src_entry.configure(border_color="green", border_width=2)
             else:
                 self.des_entry.delete(0, tk.END)
                 self.des_entry.insert(0, station_name)
                 self.selected_station_arrive_id = self.get_station_id_from_name(station_name)
-                self.result_label2.configure(text="Selected station: " + station_name)
+                self.des_entry.configure(border_color="green", border_width=2)
         else:
             print("Vous avez cliqué sur un point inconnu.")
 
@@ -289,19 +299,19 @@ class MetroAppUI(tk.Frame):
 
             if self.dropdown_menu_depart.curselection():
                 selected_station = self.dropdown_menu_depart.get(self.dropdown_menu_depart.curselection()[0])
+                self.src_entry.configure(border_color="green", border_width=2)
                 self.src_entry.delete(0, tk.END)
                 self.src_entry.insert(0, selected_station)
                 self.selected_station_depart_id = self.get_station_id_from_name(selected_station)
-                self.result_label.configure(text="Selected station: " + selected_station)
             self.dropdown_menu_depart.pack_forget()
         else:
 
             if self.dropdown_menu_arrive.curselection():
                 selected_station = self.dropdown_menu_arrive.get(self.dropdown_menu_arrive.curselection()[0])
+                self.src_entry.configure(border_color="green", border_width=2)
                 self.des_entry.delete(0, tk.END)
                 self.des_entry.insert(0, selected_station)
                 self.selected_station_arrive_id = self.get_station_id_from_name(selected_station)
-                self.result_label2.configure(text="Selected station: " + selected_station)
             self.dropdown_menu_arrive.pack_forget()
 
         # this update the calculate itinerary button to make it disabled or not when necessary
@@ -314,27 +324,24 @@ class MetroAppUI(tk.Frame):
 
         # Depart
         src_label = ctk.CTkLabel(self.control_frame, text="Départ:", font=("Arial", 16))
-        src_label.pack(anchor='w', pady=(30, 10), padx=(10, 10))
+        src_label.pack(anchor='w', pady=(30, 1), padx=(10, 10))
         # this deals with the entry of input of station de départ
-        self.src_entry = ctk.CTkEntry(self.control_frame, font=("Arial", 16), width=300, height=40)
-        self.src_entry.pack(anchor='w', pady=15, padx=(10, 10))
+        self.src_entry = ctk.CTkEntry(self.control_frame, font=("Arial", 16), width=300, height=40, border_color="grey",
+                                      border_width=1)
+        self.src_entry.pack(anchor='w', pady=5, padx=(10, 10))
         self.src_entry.bind("<KeyRelease>", lambda event: self.on_src_entry_change(self.src_entry))
         self.src_entry.bind("<FocusIn>", lambda event: self.set_selecting_departure())
-
-        # Label to display matching stations
-        self.result_label = tk.Label(self.control_frame, text="", font=("Arial", 16))
-        self.result_label.pack(anchor='w', pady=(5, 0), padx=(10, 10))
 
         # Dropdown menu for matching stations
         self.dropdown_menu_depart = tk.Listbox(self.control_frame, font=("Arial", 16), width=30, height=5)
         self.dropdown_menu_depart.bind("<<ListboxSelect>>", self.on_dropdown_select)
 
-        # Destination
         des_label = ctk.CTkLabel(self.control_frame, text="Destination:", font=("Arial", 16))
-        des_label.pack(anchor='w', pady=10, padx=(10, 10))
+        des_label.pack(anchor='w', pady=(30, 1), padx=(10, 10))
         # this deals with the entry of input of station de départ
-        self.des_entry = ctk.CTkEntry(self.control_frame, font=("Arial", 16), width=300, height=40)
-        self.des_entry.pack(anchor='w', pady=15, padx=(10, 10))
+        self.des_entry = ctk.CTkEntry(self.control_frame, font=("Arial", 16), width=300, height=40, border_color="grey",
+                                      border_width=1)
+        self.des_entry.pack(anchor='w', pady=5, padx=(10, 10))
         self.des_entry.bind("<KeyRelease>", lambda event: self.on_des_entry_change(self.des_entry))
         self.des_entry.bind("<FocusIn>", lambda event: self.set_selecting_arrival())
         icon = ctk.CTkImage(light_image=Image.open("Version1/LOGO_EFREI-WEB_blanc.png"),
@@ -357,10 +364,6 @@ class MetroAppUI(tk.Frame):
             height=25  # Adjusted height
         )
         set_station_button.pack(anchor='w', pady=10, padx=(10, 10))
-
-        # Label to display matching stations
-        self.result_label2 = tk.Label(self.control_frame, text="", font=("Arial", 16))
-        self.result_label2.pack(anchor='w', pady=5, padx=(10, 10))
 
         # Dropdown menu for matching stations
         self.dropdown_menu_arrive = tk.Listbox(self.control_frame, font=("Arial", 16), width=30, height=5)
@@ -397,7 +400,6 @@ class MetroAppUI(tk.Frame):
         )
         acpm_button.pack(anchor='w', pady=10, padx=(10, 10))
 
-
         clear_button = ctk.CTkButton(
             self.control_frame,
             text="Réinitialiser l'itinéraire",
@@ -414,15 +416,12 @@ class MetroAppUI(tk.Frame):
         )
         clear_button.pack(anchor='w', pady=5, padx=(10, 10))
 
-
-
-
     def set_station_as_destination(self, station_name):
         """Set a specific station as the destination."""
         self.des_entry.delete(0, tk.END)
         self.des_entry.insert(0, station_name)
         self.selected_station_arrive_id = self.get_station_id_from_name(station_name)
-        self.result_label2.configure(text="Selected station: " + station_name)
+        self.des_entry.configure(border_color="green", border_width=2)
 
         # this update the calculate itinerary button to make it disabled or not when necessary
         self.update_calc_button_state()
@@ -560,12 +559,15 @@ class MetroAppUI(tk.Frame):
 
         # Display total weight in hours and minutes only if hours > 0
         if hours > 0:
-            total_weight_label = ctk.CTkLabel(self.itinerary_frame, text=f"Temps de trajet: {hours} hours {minutes} minutes",
-                                  wraplength=200, image=clockicon, compound="left", padx=5, width=150, height=30, font=("Arial",15))
+            total_weight_label = ctk.CTkLabel(self.itinerary_frame,
+                                              text=f"Temps de trajet: {hours} hours {minutes} minutes",
+                                              wraplength=200, image=clockicon, compound="left", padx=5, width=150,
+                                              height=30, font=("Arial", 15))
             total_weight_label.pack(pady=10)
         else:
             total_weight_label = ctk.CTkLabel(self.itinerary_frame, text=f"Temps de trajet: {minutes} minutes",
-                                              wraplength=200, image=clockicon, compound="left", padx=5, width=150, height=30, font=("Arial",15))
+                                              wraplength=200, image=clockicon, compound="left", padx=5, width=150,
+                                              height=30, font=("Arial", 15))
             total_weight_label.pack(pady=10)
 
             # Create a green label with icon to display CO2 saved
@@ -578,10 +580,9 @@ class MetroAppUI(tk.Frame):
             else:
                 bg_color = "#67ef79"  # Original green color
 
-            co2_label = ctk.CTkLabel(self.itinerary_frame, text=text_CO2, wraplength=200, font=("Arial",15),
+            co2_label = ctk.CTkLabel(self.itinerary_frame, text=text_CO2, wraplength=200, font=("Arial", 15),
                                      bg_color=bg_color, image=leaficon, compound="left", padx=5, width=150, height=30)
             co2_label.pack(pady=5)
-
 
         self.scrollable_frame = ctk.CTkScrollableFrame(self.itinerary_frame, width=400, height=200)
 
@@ -627,8 +628,6 @@ class MetroAppUI(tk.Frame):
         path, total_weight = dijkstra(self.metro_graph, self.selected_station_depart_id,
                                       self.selected_station_arrive_id)
 
-
-
         # Display metro line images with station names and buttons
         self.display_metro_line_images(total_weight, path)
 
@@ -661,8 +660,8 @@ class MetroAppUI(tk.Frame):
         self.src_entry.delete(0, tk.END)
         self.des_entry.delete(0, tk.END)
 
-        self.result_label.configure(text="")
-        self.result_label2.configure(text="")
+        self.src_entry.configure(border_color="grey", border_width=1)
+        self.des_entry.configure(border_color="grey", border_width=1)
 
         # Clear dropdown menus and hide them
         self.dropdown_menu_depart.delete(0, tk.END)
@@ -688,8 +687,8 @@ class MetroAppUI(tk.Frame):
         # Update labels to reflect the switched stations
         selected_station_depart_name = self.metro_graph.nodes[self.selected_station_depart_id]['name']
         selected_station_arrive_name = self.metro_graph.nodes[self.selected_station_arrive_id]['name']
-        self.result_label.configure(text="Selected station: " + selected_station_depart_name)
-        self.result_label2.configure(text="Selected station: " + selected_station_arrive_name)
+        # self.result_label.configure(text="Selected station: " + selected_station_depart_name)
+        # self.result_label2.configure(text="Selected station: " + selected_station_arrive_name)
 
         # Update the state of the calculate itinerary button
         self.update_calc_button_state()
@@ -703,8 +702,3 @@ class MetroAppUI(tk.Frame):
 
     def button_clicked(self):
         print("Calculate button clicked")
-    
-
-        
-
-
