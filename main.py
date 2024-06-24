@@ -2,7 +2,7 @@ import time
 import networkx as nx
 import tkinter as tk
 import customtkinter as ctk
-from UI.InterfaceV1 import MetroAppUI
+from UI.InterfaceV1 import MetroAppUIV1
 from Data.ExtractData import dataversion1, dataversion2
 from Data.utilities import metro_lines_info
 
