@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 
 
 def dataversion1():
-    print("Data version 1")
+    #print("Data version 1")
     file = open("Version1/metro.txt", "r", encoding ='utf-8')
     # start at line 15
     for i in range(15):
@@ -38,11 +38,11 @@ def dataversion1():
             G.add_edge(int(line[1]), int(line[2]), duration=int(line[3]))
 
     file.close()
-    print(G)
+    #print(G)
     #print(G.nodes)
     #print(G.edges)
-    for station_id, data in G.nodes(data=True):
-        print(f"Station ID: {station_id}, Name: {data['name']}, Metro Line: {data['ligne']}")
+    #for station_id, data in G.nodes(data=True):
+        #print(f"Station ID: {station_id}, Name: {data['name']}, Metro Line: {data['ligne']}")
 
     return G
 
@@ -132,7 +132,7 @@ def dataversion2():
                                                                                                            stop_name[
                                                                                                                5]]])  # [stop_id, stop_name, line, time, wheelchair, coordinates]
 
-    print(stops)
+    #print(stops)
 
     # Create the graph
     G = nx.DiGraph()
@@ -148,7 +148,7 @@ def dataversion2():
 
             # Store all the direction of the line
             terminus = directions[stop[i][2]]
-            print(terminus)
+            #print(terminus)
             # Verify if the edge already exists
             if not G.has_edge(stop[i][0], stop[i + 1][0]):
                 # we will choose directed edges to avoid pb with the directions
@@ -188,11 +188,11 @@ def dataversion2():
     file.close()
 
     # verify if the graph is directed
-    print(is_directed(G))
+    #print(is_directed(G))
 
 
-    for node in G.nodes:
-        print("node", node, "name", G.nodes[node]['name'], "branchement", G.nodes[node]['branchement'])
+    #for node in G.nodes:
+        #print("node", node, "name", G.nodes[node]['name'], "branchement", G.nodes[node]['branchement'])
 
     connected = IfGraphConnect(G)
 
@@ -222,7 +222,7 @@ def dataversion2():
     nx.draw_networkx_labels(G, pos, labels, font_size=5)
 
 
-    plt.show()
+    #plt.show()
 
     return G
 
@@ -263,7 +263,7 @@ def time_difference(time1, time2):
 
 
 
-dataversion1()
+#dataversion1()
 #test = dijkstra(dataversion1(), 1,25)
 #print(test)
 #print("The shortest path is:")

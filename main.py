@@ -3,6 +3,7 @@ import networkx as nx
 import tkinter as tk
 import customtkinter as ctk
 from UI.InterfaceV1 import MetroAppUIV1
+from UI.InterfaceV2 import MetroAppUIV2
 from Data.ExtractData import dataversion1, dataversion2
 from Data.utilities import metro_lines_info
 
@@ -29,7 +30,11 @@ def start_app(version, app):
 
     # Create a new instance of MetroAppUI with the selected data version
     root = tk.Tk()
-    MetroAppUIV1(master=root, image_path=metro_image_path, points_txt=file_path, metro_graph=metro_graph, metro_line_image=metro_lines_info).mainloop()
+    if version == "Version 1":
+        MetroAppUIV1(master=root, image_path=metro_image_path, points_txt=file_path, metro_graph=metro_graph,
+                     metro_line_image=metro_lines_info).mainloop()
+    elif version == "Version 2":
+        MetroAppUIV2(master=root, metro_graph=metro_graph, metro_line_image=metro_lines_info).mainloop()
 
 
 def choose_data_menu():
@@ -54,13 +59,10 @@ def choose_data_menu():
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_columnconfigure(1, weight=1)
 
-
-
     # Create Version 1 button and description
     button1 = ctk.CTkButton(frame, text="Version 1", command=lambda: start_app("Version 1", app))
     # button1 = ctk.CTkButton(frame, text="Version 1", command=test_callback)  # Temporary test callback
     button1.grid(row=0, column=0, padx=20, pady=10, sticky="ew")
-
 
     description1 = ctk.CTkLabel(frame, text="Description pour la Version 1:\n\n"
                                             "Cette version est la plus basique avec un plan du métro"
@@ -68,8 +70,6 @@ def choose_data_menu():
                                             "Le graphique n'est pas orienté. Cette version est efficace et rapide mais manque de mises à jour ou de nouvelles données.",
                                 wraplength=250, anchor="nw", justify="left")
     description1.grid(row=1, column=0, padx=20, pady=5, sticky="nsew")
-
-
 
     # Create Version 2 button and description
     button2 = ctk.CTkButton(frame, text="Version 2", command=lambda: start_app("Version 2", app))
@@ -83,11 +83,13 @@ def choose_data_menu():
     description2.grid(row=1, column=1, padx=20, pady=5, sticky="nsew")
 
     # Create developer names label
-    developers_label = ctk.CTkLabel(app, text="Magnifiquement codé par notre équipe : Yoke, Maxime, Roxanne, Mélissa & Audrey",
+    developers_label = ctk.CTkLabel(app,
+                                    text="Magnifiquement codé par notre équipe : Yoke, Maxime, Roxanne, Mélissa & Audrey",
                                     font=ctk.CTkFont(size=12))
     developers_label.pack(side="bottom", pady=20)
 
     # Run the application
     app.mainloop()
+
 
 choose_data_menu()
