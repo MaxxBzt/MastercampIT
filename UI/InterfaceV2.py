@@ -73,6 +73,8 @@ class MetroAppUIV2(tk.Frame):
         # Set the node color to white
         nodes = nx.draw_networkx_nodes(self.metro_graph, pos=pos, ax=ax, node_size=20, node_color='white')
 
+
+
         # Create a FigureCanvasTkAgg object and attach it to the canvas_frame
         canvas = FigureCanvasTkAgg(fig, master=self.canvas_frame)
         canvas.draw()
@@ -92,6 +94,76 @@ class MetroAppUIV2(tk.Frame):
                 sel.annotation.arrow_patch.set_color('red')
 
         crs.connect("add", on_add)  # Connect the on_add function to the cursor
+
+    def display_graph_path(self, path):
+
+        undirected_graph = self.metro_graph.to_undirected()
+
+        for widget in self.canvas_frame.winfo_children():
+            widget.destroy()
+
+        # Create a dictionary of positions using the 'pos' attribute of the nodes
+        pos = {node: data['coordinates'] for node, data in undirected_graph.nodes(data=True)}
+
+        # Create a list of node ids in the same order as they are drawn on the matplotlib plot
+        node_ids = list(undirected_graph.nodes)
+
+        # Create a matplotlib figure with specified size
+        fig, ax = plt.subplots(figsize=(20, 10))  # Adjust the size here
+
+        # Set the background color to black
+        ax.set_facecolor('#1A1A1A')
+
+        # Adjust the subplot parameters to reduce the white border
+        fig.subplots_adjust(left=0.07, right=0.93, top=0.93, bottom=0.07)
+
+        # Draw only the nodes on the figure with smaller size, using the positions from the 'pos' dictionary
+        # Set the node color to white
+        nodes = nx.draw_networkx_nodes(undirected_graph, pos=pos, ax=ax, node_size=20, node_color='white')
+
+
+        # Create a FigureCanvasTkAgg object and attach it to the canvas_frame
+        canvas = FigureCanvasTkAgg(fig, master=self.canvas_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+        # Use mplcursors to add interactivity
+        crs = mplcursors.cursor(nodes, hover=True)
+
+        if path is not None:
+            # Extract only the station IDs from the path
+            station_ids = [station_id for station_id, _, _ in path]
+            # Create a list of tuples representing the edges in the path
+            edges_in_path = [(station_ids[i], station_ids[i + 1]) for i in range(len(station_ids) - 1)]
+            nx.draw_networkx_edges(undirected_graph, pos=pos, ax=ax, edgelist=edges_in_path, edge_color='yellow',
+                                   width=2)
+
+            # Get the names of the departure and destination stations
+            depart_station_name = undirected_graph.nodes[station_ids[0]]['name']
+            destination_station_name = undirected_graph.nodes[station_ids[-1]]['name']
+
+            # Create a dictionary with the positions of the departure and destination stations
+            labels_pos = {station_ids[0]: pos[station_ids[0]], station_ids[-1]: pos[station_ids[-1]]}
+
+            # Create a dictionary with the names of the departure and destination stations
+            labels = {station_ids[0]: depart_station_name, station_ids[-1]: destination_station_name}
+
+            # Draw the labels with black text on a white background
+            nx.draw_networkx_labels(undirected_graph, pos=labels_pos, labels=labels, font_color='black',
+                                    bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'), ax=ax)
+        def on_add(sel):
+            node_id = node_ids[sel.target.index]
+            if node_id in self.metro_graph:
+                node_data = self.metro_graph.nodes[node_id]
+                print(node_data)  # Print the entire node data
+                sel.annotation.set_text(node_data['name'])
+                sel.annotation.get_bbox_patch().set_facecolor('grey')  # Change the color here
+                sel.annotation.get_bbox_patch().set_alpha(1.0)  # Make the background fully opaque
+                sel.annotation.arrow_patch.set_color('red')
+
+        crs.connect("add", on_add)  # Connect the on_add function to the cursor
+
+
 
     def find_station_id(self, event):
         # Get the id of the clicked object
@@ -135,9 +207,9 @@ class MetroAppUIV2(tk.Frame):
     def set_selecting_arrival(self):
         self.selecting_departure = False
 
-    def get_station_id_from_name(self, station_name):
+    def get_station_id_from_name(self, station_name, line=None):
         for node in self.metro_graph.nodes(data=True):
-            if node[1]['name'] == station_name:
+            if node[1]['name'] == station_name and (line is None or node[1]['ligne'] == line):
                 return node[0]
         return None  # Return None if station name not found
 
@@ -172,9 +244,9 @@ class MetroAppUIV2(tk.Frame):
         # this update the calculate itinerary button to make it disabled or not when necessary
         self.update_calc_button_state()
 
-
-
     def update_calc_button_state(self):
+        print(
+            f"Departure station ID: {self.selected_station_depart_id}, Arrival station ID: {self.selected_station_arrive_id}")  # Debugging print statement
         if self.selected_station_depart_id is not None and self.selected_station_arrive_id is not None:
             self.calc_button.configure(state="normal")
         else:
@@ -251,24 +323,23 @@ class MetroAppUIV2(tk.Frame):
         self.check_entries()
 
     def on_dropdown_select(self, is_it_station_depart, event=None):
-
         if is_it_station_depart:
-
             if self.dropdown_menu_depart.curselection():
                 selected_station = self.dropdown_menu_depart.get(self.dropdown_menu_depart.curselection()[0])
                 self.src_entry.configure(border_color="green", border_width=2)
                 self.src_entry.delete(0, tk.END)
                 self.src_entry.insert(0, selected_station)
                 self.selected_station_depart_id = self.get_station_id_from_name(selected_station)
+                print(f"Departure station ID: {self.selected_station_depart_id}")  # Debugging print statement
             self.dropdown_menu_depart.pack_forget()
         else:
-
             if self.dropdown_menu_arrive.curselection():
                 selected_station = self.dropdown_menu_arrive.get(self.dropdown_menu_arrive.curselection()[0])
                 self.src_entry.configure(border_color="green", border_width=2)
                 self.des_entry.delete(0, tk.END)
                 self.des_entry.insert(0, selected_station)
                 self.selected_station_arrive_id = self.get_station_id_from_name(selected_station)
+                print(f"Arrival station ID: {self.selected_station_arrive_id}")  # Debugging print statement
             self.dropdown_menu_arrive.pack_forget()
 
         # this update the calculate itinerary button to make it disabled or not when necessary
@@ -589,6 +660,7 @@ class MetroAppUIV2(tk.Frame):
 
 
     def calculate_itinerary(self):
+        print("Calculating itinerary...")
 
         # Hide the main layout
         self.control_frame.pack_forget()
@@ -600,9 +672,12 @@ class MetroAppUIV2(tk.Frame):
         path, total_weight = dijkstra(self.metro_graph, self.selected_station_depart_id,
                                       self.selected_station_arrive_id)
 
-
+        print("Shortest path:", path)
+        # display the path on the graph
+        self.display_graph_path(path)
         # Display metro line images with station names and buttons
         self.display_metro_line_images(total_weight, path)
+
 
 
 
