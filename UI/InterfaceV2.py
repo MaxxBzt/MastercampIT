@@ -142,8 +142,12 @@ class MetroAppUIV2(tk.Frame):
             depart_station_name = undirected_graph.nodes[station_ids[0]]['name']
             destination_station_name = undirected_graph.nodes[station_ids[-1]]['name']
 
-            # Create a dictionary with the positions of the departure and destination stations
-            labels_pos = {station_ids[0]: pos[station_ids[0]], station_ids[-1]: pos[station_ids[-1]]}
+            # Offset for the labels
+            offset = 0.01
+
+            # Create a dictionary with the positions of the departure and destination stations, adjusted by the offset
+            labels_pos = {station_ids[0]: (pos[station_ids[0]][0], pos[station_ids[0]][1] + offset),
+                          station_ids[-1]: (pos[station_ids[-1]][0], pos[station_ids[-1]][1] + offset)}
 
             # Create a dictionary with the names of the departure and destination stations
             labels = {station_ids[0]: depart_station_name, station_ids[-1]: destination_station_name}
