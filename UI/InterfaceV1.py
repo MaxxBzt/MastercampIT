@@ -847,7 +847,7 @@ class MetroAppUIV1(tk.Frame):
             bg_color = "#262525"  # Darker shade of green
             text_color = "white"
         else:
-            bg_color = "##fffdfb"  # Original green color
+            bg_color = "#fffdfb"  # Original green color
             text_color = "black"
 
         line_label = ctk.CTkLabel(self.display_stations_frame, text=text_line, wraplength=200, font=("Arial", 15),

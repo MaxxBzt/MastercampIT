@@ -56,7 +56,7 @@ def dijkstra(graph, start, end):
         duree += graph[path[i]][path[i+1]]['duration']
 
         # Initialize result list for path with line change information
-        path_with_line_change = []
+    path_with_line_change = []
 
     # Mark nodes where there is a change in metro lines
     for i in range(len(path)):
