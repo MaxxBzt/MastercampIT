@@ -1,7 +1,13 @@
+import random
 import time
+import timeit
+
 import networkx as nx
 import tkinter as tk
 import customtkinter as ctk
+from cryptography.fernet import Fernet
+
+from Graph.shortestpath import dijkstra, bellman_ford
 from UI.InterfaceV1 import MetroAppUIV1
 from UI.InterfaceV2 import MetroAppUIV2
 from Data.ExtractData import dataversion1, dataversion2
@@ -84,7 +90,8 @@ def choose_data_menu():
 
     # Create developer names label
     developers_label = ctk.CTkLabel(app,
-                                    text="Magnifiquement codé par notre équipe : Yoke, Maxime, Roxanne, Mélissa & Audrey",
+                                    text="Magnifiquement codé par notre équipe : Yoke, Maxime, Roxanne, Mélissa & Audrey\n"
+                                         "Using IDFM 2024 data",
                                     font=ctk.CTkFont(size=12))
     developers_label.pack(side="bottom", pady=20)
 

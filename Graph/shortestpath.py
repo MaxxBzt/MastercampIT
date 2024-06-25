@@ -76,3 +76,31 @@ def dijkstra(graph, start, end):
     return path_with_line_change, duree
 
 
+def bellman_ford(graph, start, end):
+    # Step 1: Prepare the distance for each node
+    distance = {node: float('inf') for node in graph.nodes}
+    distance[start] = 0
+
+    # Step 2: Relax edges repeatedly
+    for _ in range(len(graph.nodes) - 1):
+        for node in graph.nodes:
+            for neighbour, attributes in graph[node].items():
+                weight = attributes.get('weight', 1)
+                if distance[node] != float('inf') and distance[node] + weight < distance[neighbour]:
+                    distance[neighbour] = distance[node] + weight
+
+    # Step 3: Check for negative-weight cycles
+    for node in graph.nodes:
+        for neighbour, attributes in graph[node].items():
+            weight = attributes.get('weight', 1)
+            if distance[node] != float('inf') and distance[node] + weight < distance[neighbour]:
+                raise ValueError("Graph contains a negative-weight cycle")
+
+    # Step 4: Path reconstruction
+    path = []
+    current_node = end
+    while current_node is not None:
+        path.insert(0, current_node)
+        current_node = next((node for node, neighbour in graph[current_node].items() if distance[node] + neighbour.get('weight', 1) == distance[current_node]), None)
+
+    return path

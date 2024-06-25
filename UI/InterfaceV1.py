@@ -1,3 +1,4 @@
+import datetime
 import tkinter as tk
 import networkx as nx
 from PIL import Image, ImageTk, ImageDraw
@@ -5,6 +6,10 @@ import pandas as pd
 import os
 import customtkinter as ctk
 from matplotlib import pyplot as plt
+from cryptography.fernet import Fernet
+
+
+
 
 from Data.ExtractData import dataversion1, merge_stations
 
@@ -41,6 +46,7 @@ class MetroAppUIV1(tk.Frame):
         self.selecting_departure = True  # Indicator for which station the user is selecting
         self.current_frame = None
         self.is_selecting_search = False
+        self.coins = 0
 
         # dictionary that will remember which point is linked to which coordinates
         self.coord_dict = {}
@@ -70,13 +76,13 @@ class MetroAppUIV1(tk.Frame):
             if self.selecting_departure:
                 self.src_entry.delete(0, tk.END)
                 self.src_entry.insert(0, station_name)
-                self.selected_station_depart_id = self.get_station_id_from_name(station_name)
+                self.selected_station_depart_id = self.get_station_id_from_name(station_name,None)
                 self.src_entry.configure(border_color="green", border_width=2)
                 self.check_entries()
             else:
                 self.des_entry.delete(0, tk.END)
                 self.des_entry.insert(0, station_name)
-                self.selected_station_arrive_id = self.get_station_id_from_name(station_name)
+                self.selected_station_arrive_id = self.get_station_id_from_name(station_name,None)
                 self.des_entry.configure(border_color="green", border_width=2)
                 self.check_entries()
 
@@ -91,7 +97,7 @@ class MetroAppUIV1(tk.Frame):
         # without it, we only get the node's ID, not attributes
         for node in self.metro_graph.nodes(data=True):
             if node[1]['name'] == station_name:
-                print("Station ID:", node[0])
+                #print("Station ID:", node[0])
                 break
         else:
             print("La station ", station_name, "n'a pas été trouvée.")
@@ -105,12 +111,42 @@ class MetroAppUIV1(tk.Frame):
     def set_selecting_arrival(self):
         self.selecting_departure = False
 
+    def get_points(self):
+        with open("Data/coins.txt", "r") as file:
+            # opens file and counts number of entries
+            coins = file.readlines()
+            print("Number of coins: ", len(coins))
+            return len(coins)
+
+    def addpoint(self):
+        # check if there is no more than two points in the day :
+        with open("Data/coins.txt", "r") as file:
+            # if there are two or more points today, do nothing
+            points = file.readlines()
+            count = 0
+            for point in points:
+                if str(datetime.datetime.now().date()) in point:
+                    count += 1
+                    if count >= 2:
+                        print("TRUE")
+                        return
+        with open("Data/coins.txt", "a") as file:
+            # write the date and hour in the file
+            file.write("Date: " + str(datetime.datetime.now()) + "\n")
+
+        # add a point to the user
+        self.pointscounter.configure(text=str(self.get_points()))
+
+
     def get_station_id_from_name(self, station_name,line):
         if line is None:
-            return None
+            # search a station by name
+            for node in self.metro_graph.nodes(data=True):
+                if node[1]['name'] == station_name:
+                    return node[0]
         for node in self.metro_graph.nodes(data=True):
             if node[1]['name'] == station_name and node[1]['ligne'] == str(line):
-                print(node[0])
+                #print(node[0])
                 return node[0]
         return None  # Return None if station name not found
 
@@ -154,26 +190,29 @@ class MetroAppUIV1(tk.Frame):
         self.home_button = ctk.CTkButton(
             self.control_frame,
             command=lambda: self.display_home_tab(),
-            text="home",
+            text="Accueil",
             text_color="black",
             compound="left",
             font=("Arial", 13),
             fg_color="white",
+            border_color="black",
+
             width=40,
-            height=15,
+            height=25,
         )
         self.home_button.pack(anchor='w', pady=(10, 0), padx=(10, 10))
 
         self.map_button = ctk.CTkButton(
             self.control_frame,
             command=lambda: self.display_map_tab(),
-            text="map details",
+            text="Détails de la carte",
             text_color="black",
             compound="left",
             font=("Arial", 13),
             fg_color="white",
+            border_color="black",
             width=40,
-            height=15,
+            height=25,
         )
         self.map_button.pack(anchor='w', pady=(10, 0), padx=(10, 10))
 
@@ -194,6 +233,17 @@ class MetroAppUIV1(tk.Frame):
                                 relief='ridge')
         self.canvas.pack(fill="both", expand=True)
         self.canvas.bind('<Configure>', self.show_full_image)
+
+        # Points counter placed at the top right
+
+        # Load the coin image
+        self.coin_image = Image.open("assets/star.png")
+        self.coin_photo = ctk.CTkImage(light_image=self.coin_image, size=(25, 25))
+
+        self.pointscounter = ctk.CTkLabel(self.master, text=str(self.get_points()), image=self.coin_photo,
+                                          font=("Arial", 16), compound="right")
+        self.pointscounter.place(relx=1.0, y=10,
+                                 anchor='ne', x=-20)
 
         # Buttons
         self.calc_button = None
@@ -379,7 +429,7 @@ class MetroAppUIV1(tk.Frame):
                 self.des_entry.configure(border_color="green", border_width=2)
                 self.des_entry.delete(0, tk.END)
                 self.des_entry.insert(0, station)
-                self.selected_station_depart_id = self.get_station_id_from_name(station,line)
+                self.selected_station_depart_id = self.get_station_id_from_name(station,str(line))
             self.dropdown_menu_arrive.pack_forget()
 
         if is_it_station_depart == None:
@@ -387,13 +437,10 @@ class MetroAppUIV1(tk.Frame):
                 selected_station = self.dropdown_search.get(self.dropdown_search.curselection()[0])
                 station = selected_station.split(" - Ligne ")[0]
                 line = selected_station.split(" - Ligne ")[1]
-                print("station",station)
-                print("line",line)
                 self.search_entry.configure(border_color="green", border_width=2)
                 self.search_entry.delete(0, tk.END)
                 self.search_entry.insert(0, station)
-                self.selected_station_depart_id = self.get_station_id_from_name(station,line)
-                print("selected_station_depart_id",self.selected_station_depart_id)
+                self.selected_station_depart_id = self.get_station_id_from_name(station,str(line))
                 self.display_stations(station)
             self.dropdown_search.pack_forget()
 
@@ -552,7 +599,7 @@ class MetroAppUIV1(tk.Frame):
 
         # Display ACPM in new window thanks to plt
         plt.figure(figsize=(10, 10))  # Adjust figure size as needed
-        nx.draw_networkx(ACPM, pos=pos, with_labels=True, labels=labels, node_size=100, node_color='skyblue',
+        nx.draw_networkx(ACPM, pos=pos, with_labels=False, labels=labels, node_size=100, node_color='skyblue',
                          edge_color='black')
 
         # Adjust plot limits if necessary
@@ -725,6 +772,8 @@ class MetroAppUIV1(tk.Frame):
         # calculate the shortest path
         path, total_weight = dijkstra(self.metro_graph, self.selected_station_depart_id,
                                       self.selected_station_arrive_id)
+
+        self.addpoint()
 
         # Display metro line images with station names and buttons
         self.display_metro_line_images(total_weight, path)
