@@ -105,9 +105,12 @@ class MetroAppUIV1(tk.Frame):
     def set_selecting_arrival(self):
         self.selecting_departure = False
 
-    def get_station_id_from_name(self, station_name):
+    def get_station_id_from_name(self, station_name,line):
+        if line is None:
+            return None
         for node in self.metro_graph.nodes(data=True):
-            if node[1]['name'] == station_name:
+            if node[1]['name'] == station_name and node[1]['ligne'] == str(line):
+                print(node[0])
                 return node[0]
         return None  # Return None if station name not found
 
@@ -309,7 +312,7 @@ class MetroAppUIV1(tk.Frame):
         for node in self.metro_graph.nodes(data=True):
             station_name_normalized = unidecode(node[1]['name'].lower())
             if user_input in station_name_normalized:
-                matching_stations.append(node[1]['name'])
+                matching_stations.append(node[1]['name'] + " - Ligne " + str(node[1]['ligne']))
 
         if matching_stations:
             for station in matching_stations:
@@ -341,7 +344,7 @@ class MetroAppUIV1(tk.Frame):
         for node in self.metro_graph.nodes(data=True):
             station_name_normalized = unidecode(node[1]['name'].lower())
             if user_input in station_name_normalized:
-                matching_stations.append(node[1]['name'])
+                matching_stations.append(node[1]['name'] + " - Ligne " + str(node[1]['ligne']))
 
         if matching_stations:
             for station in matching_stations:
@@ -360,29 +363,38 @@ class MetroAppUIV1(tk.Frame):
 
             if self.dropdown_menu_depart.curselection():
                 selected_station = self.dropdown_menu_depart.get(self.dropdown_menu_depart.curselection()[0])
+                station = selected_station.split(" - Ligne ")[0].strip()
+                line = selected_station.split(" - Ligne ")[1].strip()
                 self.src_entry.configure(border_color="green", border_width=2)
                 self.src_entry.delete(0, tk.END)
-                self.src_entry.insert(0, selected_station)
-                self.selected_station_depart_id = self.get_station_id_from_name(selected_station)
+                self.src_entry.insert(0, station)
+                self.selected_station_depart_id = self.get_station_id_from_name(station,str(line))
             self.dropdown_menu_depart.pack_forget()
         elif not is_it_station_depart:
 
             if self.dropdown_menu_arrive.curselection():
                 selected_station = self.dropdown_menu_arrive.get(self.dropdown_menu_arrive.curselection()[0])
+                station = selected_station.split(" - Ligne ")[0]
+                line = selected_station.split(" - Ligne ")[1]
                 self.des_entry.configure(border_color="green", border_width=2)
                 self.des_entry.delete(0, tk.END)
-                self.des_entry.insert(0, selected_station)
-                self.selected_station_arrive_id = self.get_station_id_from_name(selected_station)
+                self.des_entry.insert(0, station)
+                self.selected_station_depart_id = self.get_station_id_from_name(station,line)
             self.dropdown_menu_arrive.pack_forget()
 
         if is_it_station_depart == None:
             if self.dropdown_search.curselection():
                 selected_station = self.dropdown_search.get(self.dropdown_search.curselection()[0])
+                station = selected_station.split(" - Ligne ")[0]
+                line = selected_station.split(" - Ligne ")[1]
+                print("station",station)
+                print("line",line)
                 self.search_entry.configure(border_color="green", border_width=2)
                 self.search_entry.delete(0, tk.END)
-                self.search_entry.insert(0, selected_station)
-                self.selected_search_id = self.get_station_id_from_name(selected_station)
-                self.display_stations(selected_station)
+                self.search_entry.insert(0, station)
+                self.selected_station_depart_id = self.get_station_id_from_name(station,line)
+                print("selected_station_depart_id",self.selected_station_depart_id)
+                self.display_stations(station)
             self.dropdown_search.pack_forget()
 
         # this update the calculate itinerary button to make it disabled or not when necessary
@@ -510,7 +522,7 @@ class MetroAppUIV1(tk.Frame):
         """Set a specific station as the destination."""
         self.des_entry.delete(0, tk.END)
         self.des_entry.insert(0, station_name)
-        self.selected_station_arrive_id = self.get_station_id_from_name(station_name)
+        self.selected_station_arrive_id = self.get_station_id_from_name(station_name,'7')
         self.des_entry.configure(border_color="green", border_width=2)
 
         # this update the calculate itinerary button to make it disabled or not when necessary
@@ -906,7 +918,7 @@ class MetroAppUIV1(tk.Frame):
         for node in self.metro_graph.nodes(data=True):
             station_name_normalized = unidecode(node[1]['name'].lower())
             if user_input in station_name_normalized:
-                matching_stations.append(node[1]['name'])
+                matching_stations.append(node[1]['name'] + " - Ligne " + str(node[1]['ligne']))
 
         if matching_stations:
             for station in matching_stations:
