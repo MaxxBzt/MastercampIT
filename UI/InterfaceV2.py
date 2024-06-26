@@ -4,6 +4,8 @@ from PIL import Image, ImageTk, ImageDraw
 import pandas as pd
 import os
 import customtkinter as ctk
+import matplotlib
+matplotlib.use('Qt5Agg')
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -49,7 +51,6 @@ class MetroAppUIV2(tk.Frame):
         # Create the main window elements
         self.create_main_layout()
 
-        self.points_data = self.load_points()
 
     ''' UI UTILITARY FUNCTIONS -- functions useful in the UI interface '''
 
@@ -64,7 +65,7 @@ class MetroAppUIV2(tk.Frame):
         fig, ax = plt.subplots(figsize=(20, 10))  # Adjust the size here
 
         # Set the background color to black
-        ax.set_facecolor('#1A1A1A')
+        ax.set_facecolor('#323232')
 
         # Adjust the subplot parameters to reduce the white border
         fig.subplots_adjust(left=0.07, right=0.93, top=0.93, bottom=0.07)
@@ -398,7 +399,7 @@ class MetroAppUIV2(tk.Frame):
         set_station_button = ctk.CTkButton(
             self.control_frame,
             text="EFREI",
-            command=lambda: self.set_station_as_destination('Villejuif, Louis Aragon'),
+            command=lambda: self.set_station_as_destination('Villejuif - Louis Aragon'),
             text_color="white",
             image=icon,
             compound="left",
@@ -471,7 +472,7 @@ class MetroAppUIV2(tk.Frame):
         """Set a specific station as the destination."""
         self.des_entry.delete(0, tk.END)
         self.des_entry.insert(0, station_name)
-        self.selected_station_arrive_id = self.get_station_id_from_name(station_name)
+        self.selected_station_arrive_id = "IDFM:463269"
         self.des_entry.configure(border_color="green", border_width=2)
 
         # this update the calculate itinerary button to make it disabled or not when necessary
@@ -485,32 +486,22 @@ class MetroAppUIV2(tk.Frame):
         # Create a dictionary mapping node IDs to station names
         labels = {node[0]: node[1]['name'] for node in ACPM.nodes(data=True)}
 
-        pos = {}
+        #pos = {}
 
         # Iterate through nodes in ACPM
         for node in ACPM.nodes(data=True):
             node_id = node[0]
             station_name = node[1]['name']
 
-            # Find coordinates for this station name in coord_dict
-            for key, value in self.coord_dict.items():
-                if value[2] == station_name:
-                    # Adjust coordinates if necessary to correct orientation
-                    pos[node_id] = (value[0], value[1])  # Set pos[node_id] to (x, y) coordinates
-                    break  # Stop searching once found
-
+        plt.close('all')
         # Display ACPM in new window thanks to plt
         plt.figure(figsize=(10, 10))  # Adjust figure size as needed
-        nx.draw_networkx(ACPM, pos=pos, with_labels=True, labels=labels, node_size=100, node_color='skyblue',
+        nx.draw_networkx(ACPM, with_labels=False, labels=labels, node_size=100, node_color='skyblue',
                          edge_color='black')
-
-        # Adjust plot limits if necessary
-        plt.xlim(min(x for x, y in pos.values()) - 50, max(x for x, y in pos.values()) + 50)
-        plt.ylim(min(y for x, y in pos.values()) - 50, max(y for x, y in pos.values()) + 50)
-
-        plt.gca().invert_yaxis()  # Invert y-axis if needed
-
         plt.show()
+
+
+        #plt.show()
 
     ''' UI --- CALCULTE ITINERARY '''
 

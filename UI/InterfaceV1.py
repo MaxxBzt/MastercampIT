@@ -5,6 +5,8 @@ from PIL import Image, ImageTk, ImageDraw
 import pandas as pd
 import os
 import customtkinter as ctk
+import matplotlib
+matplotlib.use('Qt5Agg')
 from matplotlib import pyplot as plt
 from cryptography.fernet import Fernet
 

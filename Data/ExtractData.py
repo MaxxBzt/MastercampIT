@@ -217,9 +217,9 @@ def dataversion2():
 
     # display the graph
 
-    nx.draw(G, pos, with_labels=False, node_size=10, edge_color=edge_colors)
+    #nx.draw(G, pos, with_labels=False, node_size=10, edge_color=edge_colors)
     # Draw the labels
-    nx.draw_networkx_labels(G, pos, labels, font_size=5)
+    #nx.draw_networkx_labels(G, pos, labels, font_size=5)
 
 
     #plt.show()
