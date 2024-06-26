@@ -47,6 +47,8 @@ class MetroAppUIV2(tk.Frame):
         # dictionary that will remember which point is linked to which coordinates
         self.coord_dict = {}
 
+        self.master.configure(fg_color=("#FEF7FF","#323232"))
+
         # Set the size of the tkinter window
         self.master.geometry(f"{self.screen_width}x{self.screen_height}")
         self.master.resizable(width=True, height=True)
@@ -78,7 +80,7 @@ class MetroAppUIV2(tk.Frame):
         nodes = nx.draw_networkx_nodes(self.metro_graph, pos=pos, ax=ax, node_size=20, node_color='white')
 
 
-
+        fig.set_facecolor('#323232')
         # Create a FigureCanvasTkAgg object and attach it to the canvas_frame
         canvas = FigureCanvasTkAgg(fig, master=self.canvas_frame)
         canvas.draw()
@@ -91,7 +93,7 @@ class MetroAppUIV2(tk.Frame):
             node_id = node_ids[sel.target.index]
             if node_id in self.metro_graph:
                 node_data = self.metro_graph.nodes[node_id]
-                print(node_data)  # Print the entire node data
+                #print(node_data)  # Print the entire node data
                 sel.annotation.set_text(node_data['name'])
                 sel.annotation.get_bbox_patch().set_facecolor('grey')  # Change the color here
                 sel.annotation.get_bbox_patch().set_alpha(1.0)  # Make the background fully opaque
@@ -154,7 +156,7 @@ class MetroAppUIV2(tk.Frame):
             node_id = node_ids[sel.target.index]
             if node_id in self.metro_graph:
                 node_data = self.metro_graph.nodes[node_id]
-                print(node_data)  # Print the entire node data
+                #print(node_data)  # Print the entire node data
                 sel.annotation.set_text(node_data['name'])
                 sel.annotation.get_bbox_patch().set_facecolor('grey')  # Change the color here
                 sel.annotation.get_bbox_patch().set_alpha(1.0)  # Make the background fully opaque
@@ -169,7 +171,7 @@ class MetroAppUIV2(tk.Frame):
         point_id = event.widget.find_closest(event.x, event.y)[0]
         if point_id in self.coord_dict:
             x, y, station_name = self.coord_dict[point_id]
-            print(f"Coordonnées du point cliquées: ({x}, {y}, {station_name})")
+            #print(f"Coordonnées du point cliquées: ({x}, {y}, {station_name})")
 
             # Insert the station name into the appropriate entry field
             if self.selecting_departure:
@@ -195,7 +197,7 @@ class MetroAppUIV2(tk.Frame):
         # without it, we only get the node's ID, not attributes
         for node in self.metro_graph.nodes(data=True):
             if node[1]['name'] == station_name:
-                print("Station ID:", node[0])
+                #print("Station ID:", node[0])
                 break
         else:
             print("La station ", station_name, "n'a pas été trouvée.")
@@ -216,7 +218,7 @@ class MetroAppUIV2(tk.Frame):
 
     def create_go_back_button(self, frame):
         self.go_back_button = ctk.CTkButton(frame, text="Retour", width=250, height=50,
-                                            fg_color="blue", command=self.go_back, hover_color="navy")
+                                            fg_color="#69548D", text_color="white", command=self.go_back, hover_color="#240E45")
         self.go_back_button.pack(side="bottom", pady=10)
 
     ''' UI MANDATORY FUNCTIONS -- functions that do big things in UI '''
@@ -224,14 +226,14 @@ class MetroAppUIV2(tk.Frame):
 
     def create_main_layout(self):
         # Create a frame for the controls
-        self.control_frame = ctk.CTkFrame(self.master)
+        self.control_frame = ctk.CTkFrame(self.master, fg_color=("#ECDCFF", "#5c497e"))
         self.control_frame.pack(side="left", fill="y", padx=20, pady=20)
 
         # Create the canvas for the image
         self.canvas_frame = tk.Frame(self.master)
         self.canvas_frame.pack(side="right", fill="both", expand=True)
 
-        self.canvas = tk.Canvas(self.canvas_frame, background=self.master.cget('bg'), bd=0, highlightthickness=0,
+        self.canvas = tk.Canvas(self.canvas_frame, background="#323232", bd=0, highlightthickness=0,
                                 relief='ridge')
 
         # Display the graph
@@ -244,8 +246,8 @@ class MetroAppUIV2(tk.Frame):
         self.update_calc_button_state()
 
     def update_calc_button_state(self):
-        print(
-            f"Departure station ID: {self.selected_station_depart_id}, Arrival station ID: {self.selected_station_arrive_id}")  # Debugging print statement
+        #print(
+            #f"Departure station ID: {self.selected_station_depart_id}, Arrival station ID: {self.selected_station_arrive_id}")  # Debugging print statement
         if self.selected_station_depart_id is not None and self.selected_station_arrive_id is not None:
             self.calc_button.configure(state="normal")
         else:
@@ -276,7 +278,7 @@ class MetroAppUIV2(tk.Frame):
         for node in self.metro_graph.nodes(data=True):
             station_name_normalized = unidecode(node[1]['name'].lower())
             if user_input in station_name_normalized:
-                matching_stations.append(node[1]['name'])
+                matching_stations.append(node[1]['name'] + " - Ligne " + str(node[1]['ligne']))
 
         if matching_stations:
             for station in matching_stations:
@@ -308,7 +310,7 @@ class MetroAppUIV2(tk.Frame):
         for node in self.metro_graph.nodes(data=True):
             station_name_normalized = unidecode(node[1]['name'].lower())
             if user_input in station_name_normalized:
-                matching_stations.append(node[1]['name'])
+                matching_stations.append(node[1]['name'] + " - Ligne " + str(node[1]['ligne']))
 
         if matching_stations:
             for station in matching_stations:
@@ -325,20 +327,22 @@ class MetroAppUIV2(tk.Frame):
         if is_it_station_depart:
             if self.dropdown_menu_depart.curselection():
                 selected_station = self.dropdown_menu_depart.get(self.dropdown_menu_depart.curselection()[0])
+                station = selected_station.split(" - Ligne ")[0].strip()
+                line = selected_station.split(" - Ligne ")[1].strip()
                 self.src_entry.configure(border_color="green", border_width=2)
                 self.src_entry.delete(0, tk.END)
                 self.src_entry.insert(0, selected_station)
-                self.selected_station_depart_id = self.get_station_id_from_name(selected_station)
-                print(f"Departure station ID: {self.selected_station_depart_id}")  # Debugging print statement
+                self.selected_station_depart_id = self.get_station_id_from_name(station, str(line))
             self.dropdown_menu_depart.pack_forget()
         else:
             if self.dropdown_menu_arrive.curselection():
                 selected_station = self.dropdown_menu_arrive.get(self.dropdown_menu_arrive.curselection()[0])
+                station = selected_station.split(" - Ligne ")[0]
+                line = selected_station.split(" - Ligne ")[1]
                 self.des_entry.configure(border_color="green", border_width=2)
                 self.des_entry.delete(0, tk.END)
                 self.des_entry.insert(0, selected_station)
-                self.selected_station_arrive_id = self.get_station_id_from_name(selected_station)
-                print(f"Arrival station ID: {self.selected_station_arrive_id}")  # Debugging print statement
+                self.selected_station_arrive_id = self.get_station_id_from_name(station, str(line))
             self.dropdown_menu_arrive.pack_forget()
 
         # this update the calculate itinerary button to make it disabled or not when necessary
@@ -412,7 +416,7 @@ class MetroAppUIV2(tk.Frame):
         self.dropdown_menu_arrive = tk.Listbox(self.control_frame, font=("Arial", 16), width=30, height=5)
         self.dropdown_menu_arrive.bind("<<ListboxSelect>>", self.on_dropdown_select)
 
-        button_frame = ctk.CTkFrame(self.control_frame)
+        button_frame = ctk.CTkFrame(self.control_frame, fg_color=("#ECDCFF", "#5c497e"))
         button_frame.pack(anchor='w', pady=10, padx=(10, 10))
 
         acpm_button = ctk.CTkButton(
@@ -434,13 +438,13 @@ class MetroAppUIV2(tk.Frame):
             button_frame,
             text="Réinitialiser l'itinéraire",
             command=self.clear_travel,
-            text_color="#FFFFFF",
+            text_color="white",
             font=("Arial", 14),
-            fg_color="#FF4500",
-            hover_color="#FF6347",
+            fg_color="#eb5149",
+            hover_color="#ec7e7a",
             corner_radius=5,
             border_width=1,
-            border_color="#FF4500",
+            border_color="#ec7e7a",
             width=120,
             height=30
         )
@@ -453,8 +457,8 @@ class MetroAppUIV2(tk.Frame):
             command=self.calculate_itinerary,
             text_color="white",
             font=("Arial", 20),
-            fg_color="#669AEF",  # Button background color
-            hover_color="#2563EB",  # Button color when hovered
+            fg_color="#69548D",  # Button background color
+            hover_color="#240E45",  # Button color when hovered
             corner_radius=10,  # Rounded corners
             width=280,  # Adjusted width
             height=50,  # Adjusted height
@@ -502,7 +506,7 @@ class MetroAppUIV2(tk.Frame):
     def create_itinerary_layout(self):
 
         # Create a frame for the itinerary controls
-        self.itinerary_frame = ctk.CTkFrame(self.master)
+        self.itinerary_frame = ctk.CTkFrame(self.master, fg_color=("#ECDCFF", "#5c497e"))
         self.itinerary_frame.pack(side="left", fill="y", padx=20, pady=20)
 
         # Pack the "Quit the app" button into the itinerary frame
@@ -565,6 +569,7 @@ class MetroAppUIV2(tk.Frame):
                 self.scrollable_frame,
                 text=station_name,
                 hover=False,
+                fg_color="#846AAF",
             )
         button.pack(pady=2, anchor='center')
 
@@ -619,7 +624,7 @@ class MetroAppUIV2(tk.Frame):
                                      bg_color=bg_color, image=leaficon, compound="left", padx=5, width=150, height=30)
             co2_label.pack(pady=5)
 
-        self.scrollable_frame = ctk.CTkScrollableFrame(self.itinerary_frame, width=400, height=200)
+        self.scrollable_frame = ctk.CTkScrollableFrame(self.itinerary_frame, width=400, height=200, fg_color=("#ECDCFF","#5c497e"))
 
         self.scrollable_frame.pack(side="left", fill="y", padx=20, pady=20)
 
@@ -649,7 +654,7 @@ class MetroAppUIV2(tk.Frame):
 
 
     def calculate_itinerary(self):
-        print("Calculating itinerary...")
+        #print("Calculating itinerary...")
 
         # Hide the main layout
         self.control_frame.pack_forget()
@@ -665,7 +670,7 @@ class MetroAppUIV2(tk.Frame):
         path, total_weight = dijkstra(self.metro_graph, self.selected_station_depart_id,
                                       self.selected_station_arrive_id)
 
-        print("Shortest path:", path)
+        #print("Shortest path:", path)
 
         # Display the path on the graph
         self.display_graph_path(path)
