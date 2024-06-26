@@ -1,13 +1,14 @@
 import tkinter as tk
 import networkx as nx
 from PIL import Image, ImageTk, ImageDraw
+from Data.utilities import metro_lines_info
 import pandas as pd
 import os
 import customtkinter as ctk
 import matplotlib
 matplotlib.use('TkAgg')
 
-matplotlib.use('Qt5Agg')
+#matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -115,7 +116,7 @@ class MetroAppUIV2(tk.Frame):
         fig, ax = plt.subplots(figsize=(20, 10))  # Adjust the size here
 
         # Set the background color to black
-        ax.set_facecolor('#1A1A1A')
+        ax.set_facecolor('#323232')
 
         # Adjust the subplot parameters to reduce the white border
         fig.subplots_adjust(left=0.07, right=0.93, top=0.93, bottom=0.07)
@@ -136,28 +137,19 @@ class MetroAppUIV2(tk.Frame):
         if path is not None:
             # Extract only the station IDs from the path
             station_ids = [station_id for station_id, _, _ in path]
-            # Create a list of tuples representing the edges in the path
+            # Create a list of edges
             edges_in_path = [(station_ids[i], station_ids[i + 1]) for i in range(len(station_ids) - 1)]
-            nx.draw_networkx_edges(undirected_graph, pos=pos, ax=ax, edgelist=edges_in_path, edge_color='yellow',
+
+            # Create a list of colors for each edge based on the line to which the station belongs
+            edge_colors = [metro_lines_info[self.metro_graph.nodes[station_ids[i]]['ligne']][1] for i in
+                           range(len(station_ids) - 1)]
+
+            # Draw the edges with the corresponding colors
+            nx.draw_networkx_edges(undirected_graph, pos=pos, ax=ax, edgelist=edges_in_path, edge_color=edge_colors,
                                    width=2)
 
-            # Get the names of the departure and destination stations
-            depart_station_name = undirected_graph.nodes[station_ids[0]]['name']
-            destination_station_name = undirected_graph.nodes[station_ids[-1]]['name']
 
-            # Offset for the labels
-            offset = 0.01
 
-            # Create a dictionary with the positions of the departure and destination stations, adjusted by the offset
-            labels_pos = {station_ids[0]: (pos[station_ids[0]][0], pos[station_ids[0]][1] + offset),
-                          station_ids[-1]: (pos[station_ids[-1]][0], pos[station_ids[-1]][1] + offset)}
-
-            # Create a dictionary with the names of the departure and destination stations
-            labels = {station_ids[0]: depart_station_name, station_ids[-1]: destination_station_name}
-
-            # Draw the labels with black text on a white background
-            nx.draw_networkx_labels(undirected_graph, pos=labels_pos, labels=labels, font_color='black',
-                                    bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'), ax=ax)
         def on_add(sel):
             node_id = node_ids[sel.target.index]
             if node_id in self.metro_graph:
