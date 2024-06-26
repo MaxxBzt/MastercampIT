@@ -5,8 +5,10 @@ import pandas as pd
 import os
 import customtkinter as ctk
 import matplotlib
+matplotlib.use('TkAgg')
+
 matplotlib.use('Qt5Agg')
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from Data.ExtractData import dataversion1, merge_stations
@@ -340,7 +342,7 @@ class MetroAppUIV2(tk.Frame):
         else:
             if self.dropdown_menu_arrive.curselection():
                 selected_station = self.dropdown_menu_arrive.get(self.dropdown_menu_arrive.curselection()[0])
-                self.src_entry.configure(border_color="green", border_width=2)
+                self.des_entry.configure(border_color="green", border_width=2)
                 self.des_entry.delete(0, tk.END)
                 self.des_entry.insert(0, selected_station)
                 self.selected_station_arrive_id = self.get_station_id_from_name(selected_station)
@@ -659,17 +661,24 @@ class MetroAppUIV2(tk.Frame):
 
         # Hide the main layout
         self.control_frame.pack_forget()
+        self.canvas_frame.pack_forget()
 
         # Call the new layout
         self.create_itinerary_layout()
+
+        # Re-pack the canvas frame to fit alongside the itinerary frame
+        self.canvas_frame.pack(side="right", fill="both", expand=True)
 
         # calculate the shortest path
         path, total_weight = dijkstra(self.metro_graph, self.selected_station_depart_id,
                                       self.selected_station_arrive_id)
 
         print("Shortest path:", path)
-        # display the path on the graph
+
+        # Display the path on the graph
         self.display_graph_path(path)
+
+
         # Display metro line images with station names and buttons
         self.display_metro_line_images(total_weight, path)
 
@@ -680,13 +689,21 @@ class MetroAppUIV2(tk.Frame):
     def go_back(self):
         # Hide itinerary details
         self.itinerary_frame.pack_forget()
+        self.canvas_frame.pack_forget()
         self.clear_travel()
 
         # Show the original controls
         self.control_frame.pack(side="left", fill="y", padx=20, pady=20)
+        self.canvas_frame.pack(side="right", fill="both", expand=True)
 
         self.des_entry.delete(0, tk.END)
         self.src_entry.delete(0, tk.END)
+
+        for widget in self.canvas_frame.winfo_children():
+            widget.destroy()
+
+
+        self.display_graph()
 
         # Remove current "Go Back" and "Quit the app" buttons (if they exist)
         if hasattr(self, 'go_back_button'):
