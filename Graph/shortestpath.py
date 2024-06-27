@@ -8,6 +8,10 @@ def dijkstra(graph, start, end):
     # Initialise un dico avec par quel station passer
     previous_nodes = {node: None for node in graph.nodes}
 
+    # Initialise un dico pour garder la trace des lignes utilisées
+    used_lines = {node: [] for node in graph.nodes}
+
+
     # Crée une liste avec toutes les stations à explorer
     queue = list(graph.nodes)
     print(queue)
@@ -34,10 +38,20 @@ def dijkstra(graph, start, end):
             # On ajoute au trajet entier la distance avec la prochaine station
             distance = distances[current_node] + weight
 
+            # Récupère la ligne de métro (assumant qu'il y a un attribut 'line')
+            line = attributes.get('line', None)
+
+            # Si on a déjà utilisé cette ligne, on la saute
+            if line in used_lines[current_node]:
+                continue
+
+
             # Si la distance est plus petite que la distance actuelle, on met à jour la distance
             if distance < distances[neighbor]:
                 distances[neighbor] = distance
                 previous_nodes[neighbor] = current_node
+                used_lines[neighbor] = used_lines[current_node] + [line]
+
 
     # On crée le chemin entre la station de départ et la station d'arrivée
     path = []

@@ -46,6 +46,26 @@ class MetroAppUI(tk.Frame):
 
     ''' UI UTILITARY FUNCTIONS -- functions useful in the UI interface '''
 
+    def nav_bar(self):
+        self.nav_frame = tk.Frame(self.master, bg="white")
+        self.nav_frame.pack(side="top", fill="x")
+
+        self.main_menu_button = tk.Button(self.nav_frame, text="Main Menu", command=self.show_main_menu)
+        self.main_menu_button.pack(side="left")
+
+        self.map_button = tk.Button(self.nav_frame, text="Map", command=self.show_map)
+        self.map_button.pack(side="left")
+
+    def show_main_menu(self):
+        # Show the main menu frame
+        self.canvas_frame.pack_forget()
+        self.itinerary_frame.pack(fill="both", expand=True)
+
+    def show_map(self):
+        # Show the map frame
+        self.itinerary_frame.pack_forget()
+        self.canvas_frame.pack(fill="both", expand=True)
+
     def find_station_id(self, event):
         # Get the id of the clicked object
         point_id = event.widget.find_closest(event.x, event.y)[0]
@@ -449,4 +469,5 @@ class MetroAppUI(tk.Frame):
         time_in_seconds =itinerary[1]
         co2_difference = carbon_saved(time_in_seconds)
         print(f"CO2 saved by taking the metro: {co2_difference} g")
-        
+    
+   
