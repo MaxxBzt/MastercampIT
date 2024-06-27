@@ -43,6 +43,7 @@ class MetroAppUIV2(tk.Frame):
         self.selected_station_arrive_id = None
         self.selected_station_depart_id = None
         self.selecting_departure = True  # Indicator for which station the user is selecting
+        
 
         # dictionary that will remember which point is linked to which coordinates
         self.coord_dict = {}
@@ -679,6 +680,8 @@ class MetroAppUIV2(tk.Frame):
         # Display metro line images with station names and buttons
         self.display_metro_line_images(total_weight, path)
 
+        self.show_disabled()
+
 
 
 
@@ -759,3 +762,20 @@ class MetroAppUIV2(tk.Frame):
             self.src_entry.configure(border_color="green", border_width=2)
         else:
             self.src_entry.configure(border_color="grey", border_width=1)
+    
+    def show_disabled(self):
+        wheelchair_image = Image.open('assets/disabled.png')
+        wheelchair_photo = ImageTk.PhotoImage(wheelchair_image)
+        self.canvas.wheelchair_photo = wheelchair_photo
+        for node_id in self.metro_graph.nodes:
+            node_data = self.metro_graph.nodes[node_id]
+            # Check if the station is wheelchair accessible
+            # '1' means accessible in our data structure
+            if node_data.get('wheelchair') == '1':
+                x, y = node_data['coordinates']
+                offset_x = 10  # Example offset to place the icon next to the station
+                offset_y = 10  # Example offset to place the icon next to the station
+                self.canvas.create_image(x + offset_x, y + offset_y, image=self.canvas.wheelchair_photo)
+                
+
+               
