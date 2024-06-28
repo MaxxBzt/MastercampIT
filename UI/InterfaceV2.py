@@ -581,7 +581,6 @@ class MetroAppUIV2(tk.Frame):
             wheelchair_icon = ctk.CTkImage(light_image=Image.open("assets/disabled.png"), size=(20, 20))
             # Create a frame to hold the icon and the button
             frame = ctk.CTkFrame(self.scrollable_frame, fg_color='transparent')
-            frame.pack(anchor='center', pady=10, padx=(10, 10), fill='x')
 
         if next_is_line_change == "True":
             button_text = f"Change line station at {station_name}"
@@ -604,12 +603,12 @@ class MetroAppUIV2(tk.Frame):
             )
         else:
             if wheelchair_icon:
+                frame.pack(anchor='center', pady=10, padx=(10, 10), fill='x')
                 # Create a label for the wheelchair icon
-                icon_label = ctk.CTkLabel(frame, image=wheelchair_icon, text="")
-                icon_label.pack(side='left', padx=(0, 5))
                 button = ctk.CTkButton(
                     frame,
                     text=station_name,
+                    image=wheelchair_icon,
                     hover=False,
                     fg_color="#846AAF",
                 )
