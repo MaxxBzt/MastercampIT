@@ -179,8 +179,6 @@ class MetroAppUIV1(tk.Frame):
             return data
 
     def display_map_tab(self):
-
-
             self.current_frame.pack_forget()
 
             # Call the new layout
@@ -196,36 +194,14 @@ class MetroAppUIV1(tk.Frame):
         self.clear_travel()
 
     def nav_bar(self):
+        self.nav_frame = tk.Frame(self.master, bg="white")
+        self.nav_frame.pack(side="top", fill="x")
 
-        self.home_button = ctk.CTkButton(
-            self.control_frame,
-            command=lambda: self.display_home_tab(),
-            text="Accueil",
-            text_color="black",
-            compound="left",
-            font=("Arial", 13),
-            border_color="black",
-            fg_color="#ECDCFF",  # Button background color
-            hover_color="#D5BBFC",
-            width=40,
-            height=25,
-        )
-        self.home_button.pack(anchor='w', pady=(10, 0), padx=(10, 10))
+        self.home_button = ctk.CTkButton(self.nav_frame, text="Accueil", fg_color="#5c497e", hover=False, command=lambda: self.display_home_tab(),)
+        self.home_button.pack(side="left", padx=(20, 10), pady=(10,10))
 
-        self.map_button = ctk.CTkButton(
-            self.control_frame,
-            command=lambda: self.display_map_tab(),
-            text="Détails de la carte",
-            text_color="black",
-            compound="left",
-            font=("Arial", 13),
-            fg_color="#ECDCFF",  # Button background color
-            hover_color="#D5BBFC",
-            border_color="black",
-            width=40,
-            height=25,
-        )
-        self.map_button.pack(anchor='w', pady=(10, 0), padx=(10, 10))
+        self.map_button = ctk.CTkButton(self.nav_frame, text="Détails de la carte", hover=False, fg_color="#5c497e", command=lambda: self.display_map_tab(),)
+        self.map_button.pack(side="left", padx=(10, 0),pady=(10,10))
 
     def create_main_layout(self):
 
@@ -466,7 +442,6 @@ class MetroAppUIV1(tk.Frame):
                 self.search_entry.configure(border_color="green", border_width=2)
                 self.search_entry.delete(0, tk.END)
                 self.search_entry.insert(0, selected_station)
-                self.selected_station_depart_id = self.get_station_id_from_name(selected_station,None)
                 self.display_stations(selected_station)
             self.dropdown_search.pack_forget()
 
@@ -1009,7 +984,7 @@ class MetroAppUIV1(tk.Frame):
 
     def create_back_button(self, frame):
         self.go_back_button_map = ctk.CTkButton(frame, text="Retour", width=250, height=50,
-                                                fg_color="69548D", text_color="white", hover_color="#240E45", command=self.go_back_to_map)
+                                                fg_color="#69548D", text_color="white", hover_color="#240E45", command=self.go_back_to_map)
         self.go_back_button_map.pack(side="bottom", pady=10)
 
     def go_back_to_map(self):

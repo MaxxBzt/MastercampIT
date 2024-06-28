@@ -39,10 +39,13 @@ class MetroAppUIV2(tk.Frame):
         self.go_back_button = None
         self.itinerary_frame = None
         self.src_entry = None
+        self.selected_search_id = None
         self.scrollable_frame = None
         self.selected_station_arrive_id = None
         self.selected_station_depart_id = None
         self.selecting_departure = True  # Indicator for which station the user is selecting
+        self.current_frame = None
+        self.is_selecting_search = False
         
 
         # dictionary that will remember which point is linked to which coordinates
@@ -206,6 +209,9 @@ class MetroAppUIV2(tk.Frame):
     def set_selecting_departure(self):
         self.selecting_departure = True
 
+    def set_selecting_search(self):
+        self.is_selecting_search = True
+
     def set_selecting_arrival(self):
         self.selecting_departure = False
 
@@ -224,10 +230,47 @@ class MetroAppUIV2(tk.Frame):
 
     ''' UI MANDATORY FUNCTIONS -- functions that do big things in UI '''
 
+    def display_map_tab(self):
+            self.current_frame.pack_forget()
+            self.canvas_frame.pack_forget()
+
+            # Call the new layout
+            self.create_map_layout()
+
+            # Re-pack the canvas frame to fit alongside the itinerary frame
+            self.canvas_frame.pack(side="right", fill="both", expand=True)
+
+
+    def display_home_tab(self):
+        # Hide the main layout
+        self.current_frame.pack_forget()
+        self.canvas_frame.pack_forget()
+
+        # Show the original controls
+        self.control_frame.pack(side="left", fill="y", padx=20, pady=20)
+        self.current_frame = self.control_frame
+        self.clear_travel()
+
+        self.canvas_frame.pack(side="right", fill="both", expand=True)
+
+    def nav_bar(self):
+        self.nav_frame = tk.Frame(self.master, bg="white")
+        self.nav_frame.pack(side="top", fill="x")
+
+        self.home_button = ctk.CTkButton(self.nav_frame, text="Accueil", fg_color="#5c497e", hover=False,
+                                         command=lambda: self.display_home_tab())
+        self.home_button.pack(side="left", padx=(20, 10), pady=(10, 10))
+
+        self.map_button = ctk.CTkButton(self.nav_frame, text="Détails de la carte", hover=False, fg_color="#5c497e",
+                                        command=lambda: self.display_map_tab())
+        self.map_button.pack(side="left", padx=(10, 0), pady=(10, 10))
 
     def create_main_layout(self):
+
+        self.nav_bar()
         # Create a frame for the controls
         self.control_frame = ctk.CTkFrame(self.master, fg_color=("#ECDCFF", "#5c497e"))
+        self.current_frame = self.control_frame
         self.control_frame.pack(side="left", fill="y", padx=20, pady=20)
 
         # Create the canvas for the image
@@ -325,7 +368,9 @@ class MetroAppUIV2(tk.Frame):
         self.check_entries()
 
     def on_dropdown_select(self, is_it_station_depart, event=None):
+
         if is_it_station_depart:
+
             if self.dropdown_menu_depart.curselection():
                 selected_station = self.dropdown_menu_depart.get(self.dropdown_menu_depart.curselection()[0])
                 station = selected_station.split(" - Ligne ")[0].strip()
@@ -335,7 +380,8 @@ class MetroAppUIV2(tk.Frame):
                 self.src_entry.insert(0, selected_station)
                 self.selected_station_depart_id = self.get_station_id_from_name(station, str(line))
             self.dropdown_menu_depart.pack_forget()
-        else:
+        elif not is_it_station_depart:
+
             if self.dropdown_menu_arrive.curselection():
                 selected_station = self.dropdown_menu_arrive.get(self.dropdown_menu_arrive.curselection()[0])
                 station = selected_station.split(" - Ligne ")[0]
@@ -345,6 +391,15 @@ class MetroAppUIV2(tk.Frame):
                 self.des_entry.insert(0, selected_station)
                 self.selected_station_arrive_id = self.get_station_id_from_name(station, str(line))
             self.dropdown_menu_arrive.pack_forget()
+
+        if is_it_station_depart == None:
+            if self.dropdown_search.curselection():
+                selected_station = self.dropdown_search.get(self.dropdown_search.curselection()[0])
+                self.search_entry.configure(border_color="green", border_width=2)
+                self.search_entry.delete(0, tk.END)
+                self.search_entry.insert(0, selected_station)
+                self.display_stations(selected_station)
+            self.dropdown_search.pack_forget()
 
         # this update the calculate itinerary button to make it disabled or not when necessary
         self.update_calc_button_state()
@@ -508,6 +563,7 @@ class MetroAppUIV2(tk.Frame):
 
         # Create a frame for the itinerary controls
         self.itinerary_frame = ctk.CTkFrame(self.master, fg_color=("#ECDCFF", "#5c497e"))
+        self.current_frame = self.itinerary_frame
         self.itinerary_frame.pack(side="left", fill="y", padx=20, pady=20)
 
         # Pack the "Quit the app" button into the itinerary frame
@@ -809,4 +865,220 @@ class MetroAppUIV2(tk.Frame):
             self.src_entry.configure(border_color="green", border_width=2)
         else:
             self.src_entry.configure(border_color="grey", border_width=1)
+
+    ''' UI --- MAP  LAYOUT'''
+
+    def create_map_layout(self):
+
+        # Create a frame for the itinerary controls
+        self.map_frame = ctk.CTkFrame(self.master, fg_color=("#ECDCFF", "#5c497e"))
+        self.current_frame = self.map_frame
+        self.map_frame.pack(side="left", fill="y", padx=20, pady=20)
+        self.display_search_entry_on_map()
+
+    def display_search_entry_on_map(self):
+
+        search_label = ctk.CTkLabel(self.map_frame, text="Search for a station:", font=("Arial", 16))
+        search_label.pack(anchor='w', pady=(30, 1), padx=(10, 10))
+        # this deals with the entry of input of station de départ
+        self.search_entry = ctk.CTkEntry(self.map_frame, font=("Arial", 16), width=300, height=40, border_color="grey",
+                                         border_width=1)
+        self.search_entry.pack(anchor='w', pady=5, padx=(10, 10))
+        self.search_entry.bind("<KeyRelease>", lambda event: self.on_search_entry(self.search_entry))
+        self.search_entry.bind("<FocusIn>", lambda event: self.set_selecting_search())
+
+        scrollable_frame_on_map_frame = ctk.CTkScrollableFrame(self.map_frame, width=200, height=10,
+                                                               fg_color=("#ECDCFF", "#5c497e"))
+        scrollable_frame_on_map_frame.pack(side="left", fill="y", padx=20, pady=20)
+
+        # Dropdown menu for matching stations
+        self.dropdown_search = tk.Listbox(self.map_frame, font=("Arial", 16), width=30, height=5)
+        self.dropdown_search.bind("<<ListboxSelect>>", self.on_dropdown_select)
+
+        for line_number, (image_path, color) in self.metro_line_image.items():
+            line_image = ctk.CTkImage(light_image=Image.open(image_path),
+                                      size=(30, 30))
+
+            button = ctk.CTkButton(
+                scrollable_frame_on_map_frame,
+                text=f"Ligne {line_number}",
+                text_color="white",
+                image=line_image,
+                compound="left",
+                font=("Arial", 14),
+                fg_color=color,
+                corner_radius=10,
+                border_width=2,
+                border_color=color,
+                width=10,
+                hover=False,
+                height=10
+            )
+            button.image = line_image  # Retain a reference to the image to prevent garbage collection
+            button.pack(anchor='center', pady=10, padx=(10, 10))
+
+            button.bind("<Button-1>", lambda event, line=line_number: self.display_stations_at_line(line))
+
+    def display_stations(self, station_name):
+
+        for widget in self.map_frame.winfo_children():
+            if not isinstance(widget, ctk.CTkButton):
+                widget.destroy()
+
+        self.display_stations_frame = ctk.CTkFrame(self.map_frame, fg_color=("#ECDCFF", "#5c497e"))
+        self.display_stations_frame.pack(side="left", fill="y", padx=20, pady=20)
+
+        text_line = f"Corresponding lines for {station_name}"
+
+        # Check the current appearance mode and adjust the background color
+        if ctk.get_appearance_mode() == "Dark":
+            bg_color = "#262525"  # Darker shade of green
+            text_color = "white"
+        else:
+            bg_color = "#fffdfb"  # Original green color
+            text_color = "black"
+
+        line_label = ctk.CTkLabel(self.display_stations_frame, text=text_line, wraplength=200, font=("Arial", 15),
+                                  bg_color=bg_color, text_color=text_color, compound="left", padx=5, width=250)
+        line_label.pack(pady=5)
+
+        self.scrollable_frame_map = ctk.CTkScrollableFrame(self.display_stations_frame, width=400, height=10,
+                                                           fg_color=("#ECDCFF", "#5c497e"))
+        self.scrollable_frame_map.pack(side="left", fill="y", padx=20, pady=20)
+
+        lines = set()
+        # Collect unique line numbers for the given station_name
+        for node in self.metro_graph.nodes(data=True):
+            if node[1]['name'] == station_name:
+                lines.add(node[1]['ligne'])
+
+        # Create a button for each unique line number
+        for station_nbr in lines:
+            line_image_path = self.metro_line_image[station_nbr][0]
+            line_image = ctk.CTkImage(light_image=Image.open(line_image_path), size=(30, 30))
+
+            # Get the background color for the button from metro_lines_info
+            bg_color_button = self.metro_line_image[station_nbr][1]
+
+            button = ctk.CTkButton(
+                self.scrollable_frame_map,
+                text=f"Ligne {station_nbr}",
+                text_color="white",
+                image=line_image,
+                compound="left",
+                font=("Arial", 20),
+                fg_color=bg_color_button,
+                corner_radius=10,
+                border_width=2,
+                border_color=bg_color_button,
+                width=10,
+                hover=False,
+                height=10
+            )
+            button.pack(anchor='center', pady=10, padx=(10, 10))
+
+        # Create the "Go Back" button
+        self.create_back_button(self.scrollable_frame_map)
+
+    def on_search_entry(self, search_entry):
+
+        user_input = unidecode(self.search_entry.get().strip().lower())
+
+        # we start the search of station when we have 3 characters in the input
+        if len(user_input) < 3:
+            self.dropdown_search.pack_forget()
+            return
+
+        self.dropdown_search.delete(0, tk.END)
+        matching_stations = []
+
+        for node in self.metro_graph.nodes(data=True):
+            station_name_normalized = unidecode(node[1]['name'].lower())
+            if user_input in station_name_normalized:
+                matching_stations.append(node[1]['name'])
+
+        if matching_stations:
+            for station in matching_stations:
+                self.dropdown_search.insert(tk.END, station)
+            self.dropdown_search.pack(anchor='w', pady=(5, 0), padx=(10, 10))
+        else:
+            self.dropdown_search.pack_forget()
+
+        # Call on_dropdown_select with is_it_station_depart=True
+        self.dropdown_search.bind("<<ListboxSelect>>", lambda event: self.on_dropdown_select(None, event))
+
+    def create_back_button(self, frame):
+        self.go_back_button_map = ctk.CTkButton(frame, text="Retour", width=250, height=50,
+                                                fg_color="#69548D", text_color="white", hover_color="#240E45",
+                                                command=self.go_back_to_map)
+        self.go_back_button_map.pack(side="bottom", pady=10)
+
+    def go_back_to_map(self):
+
+        self.scrollable_frame_map.pack_forget()
+        self.display_stations_frame.pack_forget()
+
+        # Show the original controls
+        self.map_frame.pack(side="left", fill="y", padx=20, pady=20)
+
+        if hasattr(self, 'go_back_button_map'):
+            self.go_back_button_map.pack_forget()
+
+        self.display_search_entry_on_map()
+
+    def get_stations_for_line(self, line_number):
+
+        stations = []
+        for node in self.metro_graph.nodes(data=True):
+            if 'ligne' in node[1] and node[1]['ligne'] == line_number:
+                stations.append(node[1]['name'])
+
+        return stations
+
+    def display_stations_at_line(self, line_nbr):
+
+        for widget in self.map_frame.winfo_children():
+            if not isinstance(widget, ctk.CTkButton):
+                widget.destroy()
+
+        self.display_stations_at_line_frame = ctk.CTkFrame(self.map_frame, fg_color=("#ECDCFF", "#5c497e"))
+        self.display_stations_at_line_frame.pack(side="left", fill="y", padx=20, pady=20)
+
+        stations = self.get_stations_for_line(line_nbr)
+
+        bg_color_button = self.metro_line_image[line_nbr][1]
+        line_image_path = self.metro_line_image[line_nbr][0]
+        line_image = ctk.CTkImage(light_image=Image.open(line_image_path), size=(30, 30))
+
+        title_button = ctk.CTkButton(
+            self.display_stations_at_line_frame,
+            text=f"Ligne {line_nbr}",
+            text_color="white",
+            image=line_image,
+            compound="left",
+            font=("Arial", 20),
+            fg_color=bg_color_button,
+            corner_radius=10,
+            border_width=2,
+            border_color=bg_color_button,
+            width=10,
+            hover=False,
+            height=10
+        )
+        title_button.pack(pady=2, anchor='center')
+
+        self.scrollable_frame_display_stations_at_line_frame = ctk.CTkScrollableFrame(
+            self.display_stations_at_line_frame,
+            width=400, height=10, fg_color=("#ECDCFF", "#5c497e"))
+        self.scrollable_frame_display_stations_at_line_frame.pack(side="left", fill="y", padx=20, pady=20)
+
+        for station in stations:
+            button = ctk.CTkButton(
+                self.scrollable_frame_display_stations_at_line_frame,
+                text=station,
+                hover=False,
+                fg_color=("#846AAF", "#8C74A7"),
+                text_color="white"
+            )
+            button.pack(pady=2, anchor='center')
 
