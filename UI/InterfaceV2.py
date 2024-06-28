@@ -524,27 +524,64 @@ class MetroAppUIV2(tk.Frame):
 
         else:
             fg_color = "#163767"
-        # Create station change button
-        station_change_button = ctk.CTkButton(
-            self.scrollable_frame,
-            text=station_name,
-            text_color="white",
-            image=line_image,
-            compound="left",
-            font=("Arial", 20),
-            fg_color=fg_color,
-            corner_radius=10,
-            border_width=2,
-            border_color=fg_color,
-            width=10,
-            hover=False,
-            height=10
-        )
+
+        # Load the wheelchair icon if applicable
+        wheelchair_icon = None
+        if self.metro_graph.nodes[station_id].get('wheelchair') == '1':
+            wheelchair_icon = ctk.CTkImage(light_image=Image.open("assets/disabled.png"), size=(20, 20))
+            # Create a frame to hold the icon and the button
+            frame = ctk.CTkFrame(self.scrollable_frame, fg_color='transparent')
+            frame.pack(anchor='center', pady=10, padx=(10, 10), fill='x')
+
+        if wheelchair_icon:
+
+            # Create a label for the wheelchair icon
+            icon_label = ctk.CTkLabel(frame, image=wheelchair_icon, text="")
+            icon_label.pack(side='left', padx=(0, 5))
+
+            station_change_button = ctk.CTkButton(
+                frame,
+                text=station_name,
+                text_color="white",
+                image=line_image,
+                compound="left",
+                font=("Arial", 20),
+                fg_color=fg_color,
+                corner_radius=10,
+                border_width=2,
+                border_color=fg_color,
+                width=10,
+                hover=False,
+                height=10,
+            )
+
+        else:
+            station_change_button = ctk.CTkButton(
+                self.scrollable_frame,
+                text=station_name,
+                text_color="white",
+                image=line_image,
+                compound="left",
+                font=("Arial", 20),
+                fg_color=fg_color,
+                corner_radius=10,
+                border_width=2,
+                border_color=fg_color,
+                width=10,
+                hover=False,
+                height=10
+            )
         station_change_button.pack(anchor='center', pady=10, padx=(10, 10))
 
-        return line_color
+    def create_station_button(self, station_name, next_is_line_change, station_id):
 
-    def create_station_button(self, station_name, next_is_line_change):
+        # Load the wheelchair icon if applicable
+        wheelchair_icon = None
+        if self.metro_graph.nodes[station_id].get('wheelchair') == '1':
+            wheelchair_icon = ctk.CTkImage(light_image=Image.open("assets/disabled.png"), size=(20, 20))
+            # Create a frame to hold the icon and the button
+            frame = ctk.CTkFrame(self.scrollable_frame, fg_color='transparent')
+            frame.pack(anchor='center', pady=10, padx=(10, 10), fill='x')
 
         if next_is_line_change == "True":
             button_text = f"Change line station at {station_name}"
@@ -566,12 +603,23 @@ class MetroAppUIV2(tk.Frame):
                 fg_color=button_color
             )
         else:
-            button = ctk.CTkButton(
-                self.scrollable_frame,
-                text=station_name,
-                hover=False,
-                fg_color="#846AAF",
-            )
+            if wheelchair_icon:
+                # Create a label for the wheelchair icon
+                icon_label = ctk.CTkLabel(frame, image=wheelchair_icon, text="")
+                icon_label.pack(side='left', padx=(0, 5))
+                button = ctk.CTkButton(
+                    frame,
+                    text=station_name,
+                    hover=False,
+                    fg_color="#846AAF",
+                )
+            else:
+                button = ctk.CTkButton(
+                    self.scrollable_frame,
+                    text=station_name,
+                    hover=False,
+                    fg_color="#846AAF",
+                )
         button.pack(pady=2, anchor='center')
 
     def get_station_coordinates(self, station_name):
@@ -636,7 +684,9 @@ class MetroAppUIV2(tk.Frame):
             # if we are the station de depart
             if station_id == path[0][0] or station_id == path[len(path) - 1][0]:
 
-                line_color = self.create_metro_line_button(station_id, station_name, True, station_nbr)
+                self.create_metro_line_button(station_id, station_name, True, station_nbr)
+
+
             else:
                 if not line_change:
                     # if not a line change but the next station is a line change and has the same station name
@@ -647,11 +697,11 @@ class MetroAppUIV2(tk.Frame):
                             next_station_is_line_change = "True"
                             if next_station_name == self.metro_graph.nodes[self.selected_station_arrive_id]['name']:
                                 next_station_is_line_change = "Endstation"
-                    self.create_station_button(station_name, next_station_is_line_change)
+                    self.create_station_button(station_name, next_station_is_line_change, station_id)
 
                 # Check if there's a metro line change (True) to display the metro line image
                 if line_change:
-                    line_color = self.create_metro_line_button(station_id, station_name, False, station_nbr)
+                    self.create_metro_line_button(station_id, station_name, False, station_nbr)
 
 
     def calculate_itinerary(self):
@@ -679,8 +729,6 @@ class MetroAppUIV2(tk.Frame):
 
         # Display metro line images with station names and buttons
         self.display_metro_line_images(total_weight, path)
-
-        self.show_disabled()
 
 
 
@@ -762,20 +810,4 @@ class MetroAppUIV2(tk.Frame):
             self.src_entry.configure(border_color="green", border_width=2)
         else:
             self.src_entry.configure(border_color="grey", border_width=1)
-    
-    def show_disabled(self):
-        wheelchair_image = Image.open('assets/disabled.png')
-        wheelchair_photo = ImageTk.PhotoImage(wheelchair_image)
-        self.canvas.wheelchair_photo = wheelchair_photo
-        for node_id in self.metro_graph.nodes:
-            node_data = self.metro_graph.nodes[node_id]
-            # Check if the station is wheelchair accessible
-            # '1' means accessible in our data structure
-            if node_data.get('wheelchair') == '1':
-                x, y = node_data['coordinates']
-                offset_x = 10  # Example offset to place the icon next to the station
-                offset_y = 10  # Example offset to place the icon next to the station
-                self.canvas.create_image(x + offset_x, y + offset_y, image=self.canvas.wheelchair_photo)
-                
 
-               
