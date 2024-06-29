@@ -1,3 +1,4 @@
+import datetime
 import tkinter as tk
 import networkx as nx
 from PIL import Image, ImageTk, ImageDraw
@@ -6,6 +7,9 @@ import pandas as pd
 import os
 import customtkinter as ctk
 import matplotlib
+
+import UI.theme as theme
+
 matplotlib.use('TkAgg')
 
 #matplotlib.use('Qt5Agg')
@@ -51,7 +55,7 @@ class MetroAppUIV2(tk.Frame):
         # dictionary that will remember which point is linked to which coordinates
         self.coord_dict = {}
 
-        self.master.configure(fg_color=("#FEF7FF","#323232"))
+        self.master.configure(fg_color=theme.theme_background)
 
         # Set the size of the tkinter window
         self.master.geometry(f"{self.screen_width}x{self.screen_height}")
@@ -104,6 +108,32 @@ class MetroAppUIV2(tk.Frame):
                 sel.annotation.arrow_patch.set_color('red')
 
         crs.connect("add", on_add)  # Connect the on_add function to the cursor
+
+
+    def get_points(self):
+        with open("Data/coins.txt", "r") as file:
+            # opens file and counts number of entries
+            coins = file.readlines()
+            print("Number of coins: ", len(coins))
+            return len(coins)
+
+    def addpoint(self):
+        # check if there is no more than two points in the day :
+        with open("Data/coins.txt", "r") as file:
+            # if there are two or more points today, do nothing
+            points = file.readlines()
+            count = 0
+            for point in points:
+                if str(datetime.datetime.now().date()) in point:
+                    count += 1
+                    if count >= 2:
+                        return
+        with open("Data/coins.txt", "a") as file:
+            # write the date and hour in the file
+            file.write("Date: " + str(datetime.datetime.now()) + "\n")
+
+        # add a point to the user
+        self.pointscounter.configure(text=str(self.get_points()))
 
     def display_graph_path(self, path):
 
@@ -225,7 +255,7 @@ class MetroAppUIV2(tk.Frame):
 
     def create_go_back_button(self, frame):
         self.go_back_button = ctk.CTkButton(frame, text="Retour", width=250, height=50,
-                                            fg_color="#69548D", text_color="white", command=self.go_back, hover_color="#240E45")
+                                            fg_color=theme.theme_menu, text_color="white", command=self.go_back, hover_color=theme.theme_hover)
         self.go_back_button.pack(side="bottom", pady=10)
 
     ''' UI MANDATORY FUNCTIONS -- functions that do big things in UI '''
@@ -257,11 +287,11 @@ class MetroAppUIV2(tk.Frame):
         self.nav_frame = tk.Frame(self.master, bg="white")
         self.nav_frame.pack(side="top", fill="x")
 
-        self.home_button = ctk.CTkButton(self.nav_frame, text="Accueil", fg_color="#5c497e", hover=False,
+        self.home_button = ctk.CTkButton(self.nav_frame, text="Accueil", fg_color=theme.theme_menu, hover=False,
                                          command=lambda: self.display_home_tab())
         self.home_button.pack(side="left", padx=(20, 10), pady=(10, 10))
 
-        self.map_button = ctk.CTkButton(self.nav_frame, text="Détails de la carte", hover=False, fg_color="#5c497e",
+        self.map_button = ctk.CTkButton(self.nav_frame, text="Détails de la carte", hover=False, fg_color=theme.theme_menu,
                                         command=lambda: self.display_map_tab())
         self.map_button.pack(side="left", padx=(10, 0), pady=(10, 10))
 
@@ -269,7 +299,7 @@ class MetroAppUIV2(tk.Frame):
 
         self.nav_bar()
         # Create a frame for the controls
-        self.control_frame = ctk.CTkFrame(self.master, fg_color=("#ECDCFF", "#5c497e"))
+        self.control_frame = ctk.CTkFrame(self.master, fg_color=theme.theme_frame)
         self.current_frame = self.control_frame
         self.control_frame.pack(side="left", fill="y", padx=20, pady=20)
 
@@ -279,6 +309,35 @@ class MetroAppUIV2(tk.Frame):
 
         self.canvas = tk.Canvas(self.canvas_frame, background="#323232", bd=0, highlightthickness=0,
                                 relief='ridge')
+
+        # Points counter placed at the top right
+
+        # Load the coin image
+
+        # Frame of the points counter with adjusted size and padding
+        self.coinframe = ctk.CTkFrame(
+            self.master,
+            width=100,  # Adjust width to accommodate the border and content
+            height=80,  # Adjust height to accommodate the border and content
+            border_width=10,
+            border_color="#ffd635",
+            fg_color="transparent"
+        )
+        self.coinframe.place(relx=1.0, y=10, anchor='ne', x=-20)
+
+        # Load the coin image
+        self.coin_image = Image.open("assets/star.png")
+        self.coin_photo = ctk.CTkImage(light_image=self.coin_image, size=(35, 35))
+
+        # Create the points counter label
+        self.pointscounter = ctk.CTkLabel(
+            self.coinframe,
+            text=str(self.get_points()),
+            image=self.coin_photo,
+            font=("Arial", 30),
+            compound="right"
+        )
+        self.pointscounter.pack(padx=5, pady=5)  # Add padding inside the coinframe
 
         # Display the graph
         self.display_graph()
@@ -472,7 +531,7 @@ class MetroAppUIV2(tk.Frame):
         self.dropdown_menu_arrive = tk.Listbox(self.control_frame, font=("Arial", 16), width=30, height=5)
         self.dropdown_menu_arrive.bind("<<ListboxSelect>>", self.on_dropdown_select)
 
-        button_frame = ctk.CTkFrame(self.control_frame, fg_color=("#ECDCFF", "#5c497e"))
+        button_frame = ctk.CTkFrame(self.control_frame, fg_color=theme.theme_frame)
         button_frame.pack(anchor='w', pady=10, padx=(10, 10))
 
         acpm_button = ctk.CTkButton(
@@ -513,8 +572,8 @@ class MetroAppUIV2(tk.Frame):
             command=self.calculate_itinerary,
             text_color="white",
             font=("Arial", 20),
-            fg_color="#69548D",  # Button background color
-            hover_color="#240E45",  # Button color when hovered
+            fg_color=theme.theme_menu,  # Button background color
+            hover_color=theme.theme_hover,  # Button color when hovered
             corner_radius=10,  # Rounded corners
             width=280,  # Adjusted width
             height=50,  # Adjusted height
@@ -562,7 +621,7 @@ class MetroAppUIV2(tk.Frame):
     def create_itinerary_layout(self):
 
         # Create a frame for the itinerary controls
-        self.itinerary_frame = ctk.CTkFrame(self.master, fg_color=("#ECDCFF", "#5c497e"))
+        self.itinerary_frame = ctk.CTkFrame(self.master, fg_color=theme.theme_frame)
         self.current_frame = self.itinerary_frame
         self.itinerary_frame.pack(side="left", fill="y", padx=20, pady=20)
 
@@ -666,14 +725,14 @@ class MetroAppUIV2(tk.Frame):
                     text=station_name,
                     image=wheelchair_icon,
                     hover=False,
-                    fg_color="#846AAF",
+                    fg_color=theme.theme_stations,
                 )
             else:
                 button = ctk.CTkButton(
                     self.scrollable_frame,
                     text=station_name,
                     hover=False,
-                    fg_color="#846AAF",
+                    fg_color=theme.theme_stations,
                 )
         button.pack(pady=2, anchor='center')
 
@@ -728,7 +787,7 @@ class MetroAppUIV2(tk.Frame):
                                      bg_color=bg_color, image=leaficon, compound="left", padx=5, width=150, height=30)
             co2_label.pack(pady=5)
 
-        self.scrollable_frame = ctk.CTkScrollableFrame(self.itinerary_frame, width=400, height=200, fg_color=("#ECDCFF","#5c497e"))
+        self.scrollable_frame = ctk.CTkScrollableFrame(self.itinerary_frame, width=400, height=200, fg_color=theme.theme_frame)
 
         self.scrollable_frame.pack(side="left", fill="y", padx=20, pady=20)
 
@@ -871,7 +930,7 @@ class MetroAppUIV2(tk.Frame):
     def create_map_layout(self):
 
         # Create a frame for the itinerary controls
-        self.map_frame = ctk.CTkFrame(self.master, fg_color=("#ECDCFF", "#5c497e"))
+        self.map_frame = ctk.CTkFrame(self.master, fg_color=theme.theme_frame)
         self.current_frame = self.map_frame
         self.map_frame.pack(side="left", fill="y", padx=20, pady=20)
         self.display_search_entry_on_map()
@@ -888,7 +947,7 @@ class MetroAppUIV2(tk.Frame):
         self.search_entry.bind("<FocusIn>", lambda event: self.set_selecting_search())
 
         scrollable_frame_on_map_frame = ctk.CTkScrollableFrame(self.map_frame, width=200, height=10,
-                                                               fg_color=("#ECDCFF", "#5c497e"))
+                                                               fg_color=theme.theme_frame)
         scrollable_frame_on_map_frame.pack(side="left", fill="y", padx=20, pady=20)
 
         # Dropdown menu for matching stations
@@ -925,7 +984,7 @@ class MetroAppUIV2(tk.Frame):
             if not isinstance(widget, ctk.CTkButton):
                 widget.destroy()
 
-        self.display_stations_frame = ctk.CTkFrame(self.map_frame, fg_color=("#ECDCFF", "#5c497e"))
+        self.display_stations_frame = ctk.CTkFrame(self.map_frame, fg_color=theme.theme_frame)
         self.display_stations_frame.pack(side="left", fill="y", padx=20, pady=20)
 
         text_line = f"Corresponding lines for {station_name}"
@@ -943,7 +1002,7 @@ class MetroAppUIV2(tk.Frame):
         line_label.pack(pady=5)
 
         self.scrollable_frame_map = ctk.CTkScrollableFrame(self.display_stations_frame, width=400, height=10,
-                                                           fg_color=("#ECDCFF", "#5c497e"))
+                                                           fg_color=theme.theme_frame)
         self.scrollable_frame_map.pack(side="left", fill="y", padx=20, pady=20)
 
         lines = set()
@@ -1009,7 +1068,7 @@ class MetroAppUIV2(tk.Frame):
 
     def create_back_button(self, frame):
         self.go_back_button_map = ctk.CTkButton(frame, text="Retour", width=250, height=50,
-                                                fg_color="#69548D", text_color="white", hover_color="#240E45",
+                                                fg_color=theme.theme_menu, text_color="white", hover_color=theme.theme_hover,
                                                 command=self.go_back_to_map)
         self.go_back_button_map.pack(side="bottom", pady=10)
 
@@ -1041,7 +1100,7 @@ class MetroAppUIV2(tk.Frame):
             if not isinstance(widget, ctk.CTkButton):
                 widget.destroy()
 
-        self.display_stations_at_line_frame = ctk.CTkFrame(self.map_frame, fg_color=("#ECDCFF", "#5c497e"))
+        self.display_stations_at_line_frame = ctk.CTkFrame(self.map_frame, fg_color=theme.theme_frame)
         self.display_stations_at_line_frame.pack(side="left", fill="y", padx=20, pady=20)
 
         stations = self.get_stations_for_line(line_nbr)
@@ -1069,7 +1128,7 @@ class MetroAppUIV2(tk.Frame):
 
         self.scrollable_frame_display_stations_at_line_frame = ctk.CTkScrollableFrame(
             self.display_stations_at_line_frame,
-            width=400, height=10, fg_color=("#ECDCFF", "#5c497e"))
+            width=400, height=10, fg_color=theme.theme_frame)
         self.scrollable_frame_display_stations_at_line_frame.pack(side="left", fill="y", padx=20, pady=20)
 
         for station in stations:
@@ -1077,7 +1136,7 @@ class MetroAppUIV2(tk.Frame):
                 self.scrollable_frame_display_stations_at_line_frame,
                 text=station,
                 hover=False,
-                fg_color=("#846AAF", "#8C74A7"),
+                fg_color=theme.theme_stations,
                 text_color="white"
             )
             button.pack(pady=2, anchor='center')

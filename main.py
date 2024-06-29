@@ -13,6 +13,8 @@ from UI.InterfaceV2 import MetroAppUIV2
 from Data.ExtractData import dataversion1, dataversion2
 from Data.utilities import metro_lines_info
 
+# Theme colors
+import UI.theme as theme
 
 
 metro_image_path = "Version1/metrof_r.png"
@@ -44,11 +46,13 @@ def start_app(version, app):
 
 
 def choose_data_menu():
+    theme.change_theme("pink")
+
     # Initialize the main window
     app = ctk.CTk()
     app.geometry("650x500")
     app.title("Metro, Efrei, Dodo - Choosir la version")
-    app.configure(fg_color=("#FEF7FF","#323232"))
+    app.configure(fg_color=theme.theme_background)
 
     # Set appearance mode and default color theme
     ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
@@ -59,7 +63,7 @@ def choose_data_menu():
     title_label.pack(pady=20)
 
     # Create frame for buttons and descriptions
-    frame = ctk.CTkFrame(app, fg_color=("#EADEF7","#513C73"))
+    frame = ctk.CTkFrame(app, fg_color=theme.theme_frame)
     frame.pack(pady=20, padx=20, fill="both", expand=True)
 
     # Configure the columns to distribute the extra space equally
@@ -67,7 +71,7 @@ def choose_data_menu():
     frame.grid_columnconfigure(1, weight=1)
 
     # Create Version 1 button and description
-    button1 = ctk.CTkButton(frame, text="Version 1",fg_color=("#69548D","#240E45"),  hover_color=("#7C66A3","#4c1c7b"), command=lambda: start_app("Version 1", app))
+    button1 = ctk.CTkButton(frame, text="Version 1",fg_color=(theme.theme_menu),  hover_color=(theme.theme_hover), command=lambda: start_app("Version 1", app))
     # button1 = ctk.CTkButton(frame, text="Version 1", command=test_callback)  # Temporary test callback
     button1.grid(row=0, column=0, padx=20, pady=10, sticky="ew")
 
@@ -79,7 +83,7 @@ def choose_data_menu():
     description1.grid(row=1, column=0, padx=20, pady=5, sticky="nsew")
 
     # Create Version 2 button and description
-    button2 = ctk.CTkButton(frame, text="Version 2", fg_color=("#69548D","#240E45"), hover_color=("#7C66A3","#4c1c7b"), command=lambda: start_app("Version 2", app))
+    button2 = ctk.CTkButton(frame, text="Version 2", fg_color=(theme.theme_menu), hover_color=(theme.theme_hover), command=lambda: start_app("Version 2", app))
     # button2 = ctk.CTkButton(frame, text="Version 2", command=test_callback)  # Temporary test callback
     button2.grid(row=0, column=1, padx=20, pady=10, sticky="ew")
 
