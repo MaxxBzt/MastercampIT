@@ -40,6 +40,8 @@ class MetroAppUIV2(tk.Frame):
         self.image_original = None
         self.calc_button = None
         self.control_frame = None
+        self.shop_frame = None
+        self.map_frame = None
         self.go_back_button = None
         self.itinerary_frame = None
         self.src_entry = None
@@ -50,7 +52,7 @@ class MetroAppUIV2(tk.Frame):
         self.selecting_departure = True  # Indicator for which station the user is selecting
         self.current_frame = None
         self.is_selecting_search = False
-        
+
 
         # dictionary that will remember which point is linked to which coordinates
         self.coord_dict = {}
@@ -261,39 +263,42 @@ class MetroAppUIV2(tk.Frame):
     ''' UI MANDATORY FUNCTIONS -- functions that do big things in UI '''
 
     def display_map_tab(self):
+
+        if self.current_frame != self.map_frame:
             self.current_frame.pack_forget()
             self.canvas_frame.pack_forget()
-
             # Call the new layout
             self.create_map_layout()
 
-            # Re-pack the canvas frame to fit alongside the itinerary frame
-            self.canvas_frame.pack(side="right", fill="both", expand=True)
 
 
     def display_home_tab(self):
-        # Hide the main layout
-        self.current_frame.pack_forget()
-        self.canvas_frame.pack_forget()
-
-        # Show the original controls
-        self.control_frame.pack(side="left", fill="y", padx=20, pady=20)
-        self.current_frame = self.control_frame
-        self.clear_travel()
-
-        self.canvas_frame.pack(side="right", fill="both", expand=True)
+        if self.current_frame != self.control_frame:
+            # Hide the main layout
+            self.current_frame.pack_forget()
+            self.canvas_frame.pack_forget()
+            # Show the original controls
+            self.control_frame.pack(side="left", fill="y", padx=20, pady=20)
+            self.current_frame = self.control_frame
+            self.canvas_frame.pack(side="right", fill="both", expand=True)
+            self.clear_travel()
 
     def nav_bar(self):
-        self.nav_frame = tk.Frame(self.master, bg="white")
+        self.nav_frame = ctk.CTkFrame(self.master, fg_color=theme.theme_background)
         self.nav_frame.pack(side="top", fill="x")
 
         self.home_button = ctk.CTkButton(self.nav_frame, text="Accueil", fg_color=theme.theme_menu, hover=False,
                                          command=lambda: self.display_home_tab())
         self.home_button.pack(side="left", padx=(20, 10), pady=(10, 10))
 
-        self.map_button = ctk.CTkButton(self.nav_frame, text="Détails de la carte", hover=False, fg_color=theme.theme_menu,
+        self.map_button = ctk.CTkButton(self.nav_frame, text="Détails de la carte", hover=False,
+                                        fg_color=theme.theme_menu,
                                         command=lambda: self.display_map_tab())
         self.map_button.pack(side="left", padx=(10, 0), pady=(10, 10))
+
+        self.shop_button = ctk.CTkButton(self.nav_frame, text="Boutique", fg_color=theme.theme_menu, hover=False,
+                                         command=lambda: self.create_shop_layout())
+        self.shop_button.pack(side="left", padx=(10, 0), pady=(10, 10))
 
     def create_main_layout(self):
 
@@ -935,6 +940,7 @@ class MetroAppUIV2(tk.Frame):
         self.map_frame = ctk.CTkFrame(self.master, fg_color=theme.theme_frame)
         self.current_frame = self.map_frame
         self.map_frame.pack(side="left", fill="y", padx=20, pady=20)
+        self.canvas_frame.pack(side="right", fill="both", expand=True)
         self.display_search_entry_on_map()
 
     def display_search_entry_on_map(self):
@@ -1143,3 +1149,216 @@ class MetroAppUIV2(tk.Frame):
             )
             button.pack(pady=2, anchor='center')
 
+
+
+    ''' UI --- SHOP '''
+
+    def create_shop_layout(self):
+
+        if self.current_frame != self.shop_frame:
+            self.canvas_frame.pack_forget()
+            self.current_frame.pack_forget()
+
+            self.shop_frame = ctk.CTkFrame(self.master, fg_color=theme.theme_background)
+            self.current_frame = self.shop_frame
+            self.shop_frame.pack(fill="both", expand=True, padx=20, pady=20)
+            shop_tabview = ctk.CTkTabview(self.shop_frame,
+                                          width=600,
+                                          height=250,
+                                          corner_radius=10,
+                                          fg_color=theme.theme_frame,
+                                          segmented_button_fg_color="white",
+                                          segmented_button_selected_color=theme.theme_hover,
+                                          segmented_button_selected_hover_color=theme.theme_hover,
+                                          segmented_button_unselected_hover_color=theme.theme_menu,
+                                          segmented_button_unselected_color=theme.theme_tab,
+                                          text_color="white",
+                                          state="normal")
+            shop_tabview.pack(fill="both", expand=True, padx=20, pady=20)
+
+            shop_tabview.add("Themes")
+            shop_tabview.add("Items")
+            shop_tabview.add("Money")
+            shop_tabview.add("Charities")
+            shop_tabview.set("Themes")
+
+            self.items_images = ["assets/shop/amazon.png", "assets/shop/backpack.png",
+                            "assets/shop/theiere.png", "assets/shop/board_game.png"]
+            items_titles = [
+                "Carte cadeau Amazon",
+                "Sac à dos de voyage",
+                "Ensemble de théière en céramique",
+                "Jeu de société pour toute la famille"
+            ]
+            items_descriptions = [
+                "Offrez la liberté de choisir parmi des millions de produits avec une carte cadeau Amazon.",
+                "Sac à dos durable et fonctionnel, idéal pour les voyages et les excursions.",
+                "Ensemble élégant de théière et tasses en céramique, parfait pour les moments de détente.",
+                "Jeu de société interactif qui promet des heures de plaisir en famille ou entre amis."
+            ]
+            items_prices = [150, 200, 130, 100]
+
+            self.themes_images = ["assets/shop/theme_green.png", "assets/shop/theme_blue.png", "assets/shop/theme_pink.png",
+                             "assets/shop/theme_yellow.png", "assets/shop/theme_purple.png"]
+            themes_titles = ["Thème Vert", "Thème Bleu", "Thème Rose", "Thème Jaune", "Thème par Défaut"]
+            themes_descriptions = ["Change le thème de l'application en vert",
+                                   "Change le thème de l'application en bleu",
+                                   "Change le thème de l'application en rose",
+                                   "Change le thème de l'application en jaune",
+                                   "Revient au thème par défaut de l'application : violet"]
+
+            themes_prices = [5, 5, 5, 5, 5]
+
+            self.money_images = ["assets/shop/coin.png", "assets/shop/coin.png", "assets/shop/billet_argent.png",
+                            "assets/shop/billet_argent.png"]
+            money_titles = [
+                "Virement bancaire 5 euros",
+                "Virement bancaire 15 euros",
+                "Virement bancaire 50 euros",
+                "Virement bancaire 100 euros"
+            ]
+            money_descriptions = [
+                "Recevez un virement bancaire d'une valeur de 5 euros, utilisable librement.",
+                "Recevez un virement bancaire d'une valeur de 15 euros, utilisable librement.",
+                "Recevez un virement bancaire d'une valeur de 50 euros, utilisable librement.",
+                "Recevez un virement bancaire d'une valeur de 100 euros, utilisable librement."
+            ]
+            money_prices = [300, 800, 1500, 3500]
+
+            self.charity_images = ["assets/shop/croix_rouge.png", "assets/shop/secours_pop.png",
+                              "assets/shop/resto_coeur.png",
+                              "assets/shop/fond_abbe.png"]
+            charity_titles = [
+                "Croix-Rouge française",
+                "Secours Populaire Français",
+                "Les Restos du Cœur",
+                "Fondation Abbé Pierre"
+            ]
+            charity_descriptions = [
+                "Association humanitaire française fondée en 1864, reconnue d'utilité publique. Elle agit sur le territoire français et à l'international pour secourir les personnes en difficulté.",
+                "Association à but non lucratif créée en 1945. Elle lutte contre la pauvreté et l'exclusion en France et dans le monde, en apportant une aide matérielle, sociale et morale aux personnes en difficulté.",
+                "Association française créée par Coluche en 1985. Elle distribue des repas gratuits aux plus démunis et lutte contre la pauvreté et l'exclusion sociale.",
+                "Fondation reconnue d'utilité publique créée en 1987. Elle agit pour le logement des personnes défavorisées et défend le droit au logement pour tous."
+            ]
+            charity_prices = [50, 50, 50, 50]
+
+            self.add_buttons_to_tab(shop_tabview.tab("Items"), self.items_images, items_titles, items_descriptions,
+                                    items_prices, self.buy_other,"item")
+            self.add_buttons_to_tab(shop_tabview.tab("Themes"), self.themes_images, themes_titles, themes_descriptions,
+                                    themes_prices, self.buy_other,"theme")
+            self.add_buttons_to_tab(shop_tabview.tab("Money"), self.money_images, money_titles, money_descriptions,
+                                    money_prices, self.buy_other,"money")
+            self.add_buttons_to_tab(shop_tabview.tab("Charities"), self.charity_images, charity_titles, charity_descriptions,
+                                    charity_prices, self.buy_other,"charity")
+
+    def add_buttons_to_tab(self, tab, images, titles, descriptions, prices, command,tab_category):
+        num_buttons = len(images)
+        for index in range(num_buttons):
+            i, j = divmod(index, 3)  # Calculate row and column dynamically
+
+            frame = ctk.CTkFrame(tab, fg_color=theme.theme_stations)
+
+            # Load and display image
+            image = ctk.CTkImage(light_image=Image.open(images[index]), size=(50, 50))
+            image_label = ctk.CTkLabel(frame, image=image, text="")
+            image_label.pack(padx=10, pady=10)
+
+            # Title label
+            title_label = ctk.CTkLabel(frame, text=titles[index], font=("Helvetica", 14, "bold"))
+            title_label.pack(padx=10, pady=5)
+
+            # Description label with wrapping
+            if tab_category == "charity":
+                description_label = ctk.CTkLabel(frame, text=descriptions[index], wraplength=200, font=("Helvetica", 9))
+            else:
+                description_label = ctk.CTkLabel(frame, text=descriptions[index], wraplength=200)
+            description_label.pack(padx=10, pady=5)
+
+            # Price label
+            price_label = ctk.CTkLabel(frame, text=f"{prices[index]} Coins", font=("Helvetica", 12, "bold"))
+            price_label.pack(padx=10, pady=5)
+
+            # Buy button
+            button_command = self.create_button_command(index, command, prices[index], tab_category)
+            button = ctk.CTkButton(frame, text="Buy", fg_color=theme.theme_menu, hover_color="black",
+                                   command=button_command)
+            button.pack(padx=10, pady=10)
+
+            # Pack the frame into the tab
+            frame.grid(row=i, column=j, padx=20, pady=20, sticky="nsew")
+
+            # Configure weights for tab
+            tab.grid_rowconfigure(i, weight=1)
+            tab.grid_columnconfigure(j, weight=1)
+
+    def create_button_command(self, index, command, price, tab_category):
+        def command_wrapper():
+            total_indices = len(self.themes_images) + len(self.items_images) + len(self.money_images) + len(
+                self.charity_images)
+            if tab_category == "theme":
+                adjusted_index = index
+            elif tab_category == "item":
+                adjusted_index = len(self.themes_images) + index
+            elif tab_category == "money":
+                adjusted_index = len(self.themes_images) + len(self.items_images) + index
+            elif tab_category == "charity":
+                adjusted_index = len(self.themes_images) + len(self.items_images) + len(self.money_images) + index
+            else:
+                adjusted_index = index  # Fallback to default index
+
+            print(f"Clicked button with index: {adjusted_index}")
+            command(adjusted_index, price)
+
+        return command_wrapper
+
+    def buy_other(self, index, item_price):
+        if self.get_points() >= item_price:
+            purchase_type = self.determine_purchase_type(index)
+            if purchase_type == "item":
+
+                # self.coins -= item_price
+
+                tk.messagebox.showinfo("Achat réussi",
+                                       "Votre article vous sera envoyé sous peu à l'adresse indiquée sur votre compte.")
+
+            elif purchase_type == "money":
+                # self.coins -= item_price
+
+                tk.messagebox.showinfo("Achat réussi", "Vous recevrez un e-mail pour poursuivre le virement bancaire.")
+            elif purchase_type == "theme":
+
+                # self.coins -= item_price
+                self.process_theme_purchase(index)
+            else:
+
+                # self.coins -= item_price
+                tk.messagebox.showinfo("Achat réussi", "Merci pour votre don à une œuvre caritative.")
+
+        else:
+            # Inform the user of insufficient points or coins
+            tk.messagebox.showerror("Points insuffisants", "Pas assez de points pour acheter cet article.")
+
+    def determine_purchase_type(self, index):
+        if index < len(self.themes_images):
+            return "theme"
+        elif index < len(self.themes_images) + len(self.items_images):
+            return "item"
+        elif index < len(self.themes_images) + len(self.items_images) + len(self.money_images):
+            return "money"
+        elif index < len(self.themes_images) + len(self.items_images) + len(self.money_images) + len(self.charity_images):
+            return "charity"
+        else:
+            return "unknown"
+
+    def process_theme_purchase(self,index):
+
+        theme_names = ["green", "blue", "pink", "yellow", "default"]
+        french_theme_names = ["vert", "bleu", "rose", "jaune", "par défaut"]
+
+        if index < len(theme_names):
+            # insert logic to change theme
+            selected_theme_fr = french_theme_names[index]
+            tk.messagebox.showinfo("Achat réussi", f"Vous avez choisi le thème {selected_theme_fr}.")
+
+        else:
+            print("Invalid theme selection.")
