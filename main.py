@@ -33,17 +33,16 @@ def start_app(version, app):
         print(f"Failed to load data for {version}")
         return
 
-    # Destroy the current window
-    app.destroy()
+    # this create a new toplevel window
+    new_window = ctk.CTkToplevel(app)
+    new_window.geometry("800x600")
+    new_window.title(f"Metro App - {version}")
 
-    # Create a new instance of MetroAppUI with the selected data version
-    root = ctk.CTk()
     if version == "Version 1":
-        MetroAppUIV1(master=root, image_path=metro_image_path, points_txt=file_path, metro_graph=metro_graph,
+        MetroAppUIV1(master=new_window, image_path=metro_image_path, points_txt=file_path, metro_graph=metro_graph,
                      metro_line_image=metro_lines_info).mainloop()
     elif version == "Version 2":
-        MetroAppUIV2(master=root, metro_graph=metro_graph, metro_line_image=metro_lines_info).mainloop()
-
+        MetroAppUIV2(master=new_window, metro_graph=metro_graph, metro_line_image=metro_lines_info).mainloop()
 
 def choose_data_menu():
     theme.change_theme("default")
@@ -51,7 +50,7 @@ def choose_data_menu():
     # Initialize the main window
     app = ctk.CTk()
     app.geometry("650x500")
-    app.title("Metro, Efrei, Dodo - Choosir la version")
+    app.title("Metro, Efrei, Dodo - Choisir la version")
     app.configure(fg_color=theme.theme_background)
 
     # Set appearance mode and default color theme
@@ -71,8 +70,7 @@ def choose_data_menu():
     frame.grid_columnconfigure(1, weight=1)
 
     # Create Version 1 button and description
-    button1 = ctk.CTkButton(frame, text="Version 1",fg_color=(theme.theme_menu),  hover_color=(theme.theme_hover), command=lambda: start_app("Version 1", app))
-    # button1 = ctk.CTkButton(frame, text="Version 1", command=test_callback)  # Temporary test callback
+    button1 = ctk.CTkButton(frame, text="Version 1", fg_color=(theme.theme_menu), hover_color=(theme.theme_hover), command=lambda: start_app("Version 1", app))
     button1.grid(row=0, column=0, padx=20, pady=10, sticky="ew")
 
     description1 = ctk.CTkLabel(frame, text="Description pour la Version 1:\n\n"
@@ -84,7 +82,6 @@ def choose_data_menu():
 
     # Create Version 2 button and description
     button2 = ctk.CTkButton(frame, text="Version 2", fg_color=(theme.theme_menu), hover_color=(theme.theme_hover), command=lambda: start_app("Version 2", app))
-    # button2 = ctk.CTkButton(frame, text="Version 2", command=test_callback)  # Temporary test callback
     button2.grid(row=0, column=1, padx=20, pady=10, sticky="ew")
 
     description2 = ctk.CTkLabel(frame, text="Description pour la Version 2:\n\n"
