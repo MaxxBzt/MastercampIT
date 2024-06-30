@@ -46,7 +46,7 @@ def start_app(version, app):
 
 
 def choose_data_menu():
-    theme.change_theme("pink")
+    theme.change_theme("default")
 
     # Initialize the main window
     app = ctk.CTk()
@@ -95,7 +95,7 @@ def choose_data_menu():
 
     # Create developer names label
     developers_label = ctk.CTkLabel(app,
-                                    text="Magnifiquement codé par notre équipe : Yoke, Maxime, Roxanne, Mélissa & Audrey\n"
+                                    text="Magnifiquement codé par notre équipe : Yoke, Maxime, Roxane, Mélissa & Audrey\n"
                                          "Using IDFM 2024 data",
                                     font=ctk.CTkFont(size=12))
     developers_label.pack(side="bottom", pady=20)
