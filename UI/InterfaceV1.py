@@ -149,7 +149,6 @@ class MetroAppUIV1(tk.Frame):
         # Remove the last number of points
         with open("Data/coins.txt", "w") as file:
             file.writelines(points[:-number])
-        print(points[:number])
         # Update the points counter
         self.pointscounter.configure(text=str(self.get_points()))
 
@@ -1108,11 +1107,11 @@ class MetroAppUIV1(tk.Frame):
                                           state="normal")
             shop_tabview.pack(fill="both", expand=True, padx=20, pady=20)
 
-            shop_tabview.add("Themes")
-            shop_tabview.add("Items")
-            shop_tabview.add("Money")
-            shop_tabview.add("Charities")
-            shop_tabview.set("Themes")
+            shop_tabview.add("Thèmes")
+            shop_tabview.add("Objets")
+            shop_tabview.add("Argent")
+            shop_tabview.add("Charités")
+            shop_tabview.set("Thèmes")
 
             self.items_images = ["assets/shop/amazon.png", "assets/shop/backpack.png",
                             "assets/shop/theiere.png", "assets/shop/board_game.png"]
@@ -1138,6 +1137,7 @@ class MetroAppUIV1(tk.Frame):
                                    "Change le thème de l'application en rose",
                                    "Change le thème de l'application en jaune",
                                    "Revient au thème par défaut de l'application : violet"]
+
 
             themes_prices = [5, 5, 5, 5, 5]
 
@@ -1185,10 +1185,15 @@ class MetroAppUIV1(tk.Frame):
 
     def add_buttons_to_tab(self, tab, images, titles, descriptions, prices, command,tab_category):
         num_buttons = len(images)
+        themes_colors = [("#E7F8E7", "#2B5C2B"), ("#D8E8FF", "#1B2735"), ("#ffe7fa", "#5A2C47"), ("#feffe5", "#3F3B1D"),
+                         ("#e6d6ff", "#323232")]
         for index in range(num_buttons):
             i, j = divmod(index, 3)  # Calculate row and column dynamically
 
-            frame = ctk.CTkFrame(tab, fg_color=theme.theme_stations)
+            if tab_category == "theme":
+                frame = ctk.CTkFrame(tab, fg_color=themes_colors[index])
+            else:
+                frame = ctk.CTkFrame(tab, fg_color=theme.theme_stations)
 
             # Load and display image
             image = ctk.CTkImage(light_image=Image.open(images[index]), size=(50, 50))
@@ -1286,9 +1291,8 @@ class MetroAppUIV1(tk.Frame):
             # insert logic to change theme
             selected_theme_fr = french_theme_names[index]
             theme.change_theme(theme_names[index])
-            for widget in self.master.winfo_children():
-                widget.update()
             tk.messagebox.showinfo("Achat réussi", f"Vous avez choisi le thème {selected_theme_fr}.")
 
         else:
             print("Invalid theme selection.")
+

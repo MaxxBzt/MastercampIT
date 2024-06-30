@@ -144,7 +144,6 @@ class MetroAppUIV2(tk.Frame):
         # Remove the last number of points
         with open("Data/coins.txt", "w") as file:
             file.writelines(points[:-number])
-        print(points[:number])
         # Update the points counter
         self.pointscounter.configure(text=str(self.get_points()))
 
@@ -1264,10 +1263,15 @@ class MetroAppUIV2(tk.Frame):
 
     def add_buttons_to_tab(self, tab, images, titles, descriptions, prices, command,tab_category):
         num_buttons = len(images)
+        themes_colors = [("#E7F8E7", "#2B5C2B"), ("#D8E8FF", "#1B2735"), ("#ffe7fa", "#5A2C47"), ("#feffe5", "#3F3B1D"),
+                         ("#e6d6ff", "#323232")]
         for index in range(num_buttons):
             i, j = divmod(index, 3)  # Calculate row and column dynamically
 
-            frame = ctk.CTkFrame(tab, fg_color=theme.theme_stations)
+            if tab_category == "theme":
+                frame = ctk.CTkFrame(tab, fg_color=themes_colors[index])
+            else:
+                frame = ctk.CTkFrame(tab, fg_color=theme.theme_stations)
 
             # Load and display image
             image = ctk.CTkImage(light_image=Image.open(images[index]), size=(50, 50))
