@@ -196,11 +196,14 @@ class MetroAppUIV1(tk.Frame):
         self.nav_frame = tk.Frame(self.master, bg="white")
         self.nav_frame.pack(side="top", fill="x")
 
-        self.home_button = ctk.CTkButton(self.nav_frame, text="Accueil", fg_color=theme.theme_frame, hover=False, command=lambda: self.display_home_tab(),)
-        self.home_button.pack(side="left", padx=(20, 10), pady=(10,10))
+        self.home_button = ctk.CTkButton(self.nav_frame, text="Accueil", fg_color=theme.theme_menu, hover=False,
+                                         command=lambda: self.display_home_tab())
+        self.home_button.pack(side="left", padx=(20, 10), pady=(10, 10))
 
-        self.map_button = ctk.CTkButton(self.nav_frame, text="Détails de la carte", hover=False, fg_color=theme.theme_frame, command=lambda: self.display_map_tab(),)
-        self.map_button.pack(side="left", padx=(10, 0),pady=(10,10))
+        self.map_button = ctk.CTkButton(self.nav_frame, text="Détails de la carte", hover=False,
+                                        fg_color=theme.theme_menu,
+                                        command=lambda: self.display_map_tab())
+        self.map_button.pack(side="left", padx=(10, 0), pady=(10, 10))
 
     def create_main_layout(self):
 
