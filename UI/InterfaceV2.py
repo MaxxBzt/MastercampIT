@@ -726,6 +726,7 @@ class MetroAppUIV2(tk.Frame):
                     image=wheelchair_icon,
                     hover=False,
                     fg_color=theme.theme_stations,
+                    text_color="white",
                 )
             else:
                 button = ctk.CTkButton(
@@ -733,6 +734,7 @@ class MetroAppUIV2(tk.Frame):
                     text=station_name,
                     hover=False,
                     fg_color=theme.theme_stations,
+                    text_color="white",
                 )
         button.pack(pady=2, anchor='center')
 
@@ -781,7 +783,7 @@ class MetroAppUIV2(tk.Frame):
             if ctk.get_appearance_mode() == "Dark":
                 bg_color = "#456442"  # Darker shade of green
             else:
-                bg_color = "#67ef79"  # Original green color
+                bg_color = "#D3FFD3"  # Original green color
 
             co2_label = ctk.CTkLabel(self.itinerary_frame, text=text_CO2, wraplength=200, font=("Arial", 15),
                                      bg_color=bg_color, image=leaficon, compound="left", padx=5, width=150, height=30)
