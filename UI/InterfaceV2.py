@@ -1186,11 +1186,11 @@ class MetroAppUIV2(tk.Frame):
                                           state="normal")
             shop_tabview.pack(fill="both", expand=True, padx=20, pady=20)
 
-            shop_tabview.add("Themes")
-            shop_tabview.add("Items")
-            shop_tabview.add("Money")
-            shop_tabview.add("Charities")
-            shop_tabview.set("Themes")
+            shop_tabview.add("Thèmes")
+            shop_tabview.add("Objets")
+            shop_tabview.add("Argent")
+            shop_tabview.add("Charité")
+            shop_tabview.set("Thèmes")
 
             self.items_images = ["assets/shop/amazon.png", "assets/shop/backpack.png",
                             "assets/shop/theiere.png", "assets/shop/board_game.png"]
@@ -1252,13 +1252,13 @@ class MetroAppUIV2(tk.Frame):
             ]
             charity_prices = [50, 50, 50, 50]
 
-            self.add_buttons_to_tab(shop_tabview.tab("Items"), self.items_images, items_titles, items_descriptions,
+            self.add_buttons_to_tab(shop_tabview.tab("Objets"), self.items_images, items_titles, items_descriptions,
                                     items_prices, self.buy_other,"item")
-            self.add_buttons_to_tab(shop_tabview.tab("Themes"), self.themes_images, themes_titles, themes_descriptions,
+            self.add_buttons_to_tab(shop_tabview.tab("Thèmes"), self.themes_images, themes_titles, themes_descriptions,
                                     themes_prices, self.buy_other,"theme")
-            self.add_buttons_to_tab(shop_tabview.tab("Money"), self.money_images, money_titles, money_descriptions,
+            self.add_buttons_to_tab(shop_tabview.tab("Argent"), self.money_images, money_titles, money_descriptions,
                                     money_prices, self.buy_other,"money")
-            self.add_buttons_to_tab(shop_tabview.tab("Charities"), self.charity_images, charity_titles, charity_descriptions,
+            self.add_buttons_to_tab(shop_tabview.tab("Charité"), self.charity_images, charity_titles, charity_descriptions,
                                     charity_prices, self.buy_other,"charity")
 
     def add_buttons_to_tab(self, tab, images, titles, descriptions, prices, command,tab_category):
