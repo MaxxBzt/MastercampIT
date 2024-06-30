@@ -137,6 +137,17 @@ class MetroAppUIV2(tk.Frame):
         # add a point to the user
         self.pointscounter.configure(text=str(self.get_points()))
 
+    def remove_point(self,number):
+        # Take all the points
+        with open("Data/coins.txt", "r") as file:
+            points = file.readlines()
+        # Remove the last number of points
+        with open("Data/coins.txt", "w") as file:
+            file.writelines(points[:-number])
+        print(points[:number])
+        # Update the points counter
+        self.pointscounter.configure(text=str(self.get_points()))
+
     def display_graph_path(self, path):
 
         undirected_graph = self.metro_graph.to_undirected()
@@ -1315,23 +1326,18 @@ class MetroAppUIV2(tk.Frame):
         if self.get_points() >= item_price:
             purchase_type = self.determine_purchase_type(index)
             if purchase_type == "item":
-
-                # self.coins -= item_price
-
+                self.remove_point(item_price)
                 tk.messagebox.showinfo("Achat réussi",
                                        "Votre article vous sera envoyé sous peu à l'adresse indiquée sur votre compte.")
 
             elif purchase_type == "money":
-                # self.coins -= item_price
-
+                self.remove_point(item_price)
                 tk.messagebox.showinfo("Achat réussi", "Vous recevrez un e-mail pour poursuivre le virement bancaire.")
             elif purchase_type == "theme":
-
-                # self.coins -= item_price
+                self.remove_point(item_price)
                 self.process_theme_purchase(index)
             else:
-
-                # self.coins -= item_price
+                self.remove_point(item_price)
                 tk.messagebox.showinfo("Achat réussi", "Merci pour votre don à une œuvre caritative.")
 
         else:

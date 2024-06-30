@@ -142,6 +142,18 @@ class MetroAppUIV1(tk.Frame):
         # add a point to the user
         self.pointscounter.configure(text=str(self.get_points()))
 
+    def remove_point(self,number):
+        # Take all the points
+        with open("Data/coins.txt", "r") as file:
+            points = file.readlines()
+        # Remove the last number of points
+        with open("Data/coins.txt", "w") as file:
+            file.writelines(points[:-number])
+        print(points[:number])
+        # Update the points counter
+        self.pointscounter.configure(text=str(self.get_points()))
+
+
     def get_station_id_from_name(self, station_name, line):
         if line is None:
             # search a station by name
@@ -1235,23 +1247,18 @@ class MetroAppUIV1(tk.Frame):
         if self.get_points() >= item_price:
             purchase_type = self.determine_purchase_type(index)
             if purchase_type == "item":
-
-                # self.coins -= item_price
-
+                self.remove_point(item_price)
                 tk.messagebox.showinfo("Achat réussi",
                                        "Votre article vous sera envoyé sous peu à l'adresse indiquée sur votre compte.")
 
             elif purchase_type == "money":
-                # self.coins -= item_price
-
+                self.remove_point(item_price)
                 tk.messagebox.showinfo("Achat réussi", "Vous recevrez un e-mail pour poursuivre le virement bancaire.")
             elif purchase_type == "theme":
-
-                # self.coins -= item_price
+                self.remove_point(item_price)
                 self.process_theme_purchase(index)
             else:
-
-                # self.coins -= item_price
+                self.remove_point(item_price)
                 tk.messagebox.showinfo("Achat réussi", "Merci pour votre don à une œuvre caritative.")
 
         else:
@@ -1278,6 +1285,9 @@ class MetroAppUIV1(tk.Frame):
         if index < len(theme_names):
             # insert logic to change theme
             selected_theme_fr = french_theme_names[index]
+            theme.change_theme(theme_names[index])
+            for widget in self.master.winfo_children():
+                widget.update()
             tk.messagebox.showinfo("Achat réussi", f"Vous avez choisi le thème {selected_theme_fr}.")
 
         else:
