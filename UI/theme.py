@@ -16,6 +16,9 @@ def change_theme(theme):
     global theme_hover
     global theme_tab
 
+    with open("Data/theme.txt", "w") as f:
+        f.write(theme)
+
     if theme == "purple" or theme == "default":
         theme_background = ("#FEF7FF", "#323232")
         theme_frame = ("#ECDCFF", "#5c497e")

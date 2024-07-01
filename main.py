@@ -45,7 +45,10 @@ def start_app(version, app):
         MetroAppUIV2(master=new_window, metro_graph=metro_graph, metro_line_image=metro_lines_info).mainloop()
 
 def choose_data_menu():
-    theme.change_theme("default")
+    # Load the theme from the file
+    with open("Data/theme.txt", "r") as f:
+        theme_name = f.read().strip()
+    theme.change_theme(theme_name)
 
     # Initialize the main window
     app = ctk.CTk()

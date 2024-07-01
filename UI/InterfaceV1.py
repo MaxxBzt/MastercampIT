@@ -1291,7 +1291,7 @@ class MetroAppUIV1(tk.Frame):
             # insert logic to change theme
             selected_theme_fr = french_theme_names[index]
             theme.change_theme(theme_names[index])
-            tk.messagebox.showinfo("Achat réussi", f"Vous avez choisi le thème {selected_theme_fr}.")
+            tk.messagebox.showinfo("Achat réussi", f"Merci de re-démarrer l'app pour appliquer le thème : {selected_theme_fr}.")
 
         else:
             print("Invalid theme selection.")
