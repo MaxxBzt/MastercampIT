@@ -1275,7 +1275,7 @@ class MetroAppUIV2(tk.Frame):
             if tab_category == "theme":
                 frame = ctk.CTkFrame(tab, fg_color=themes_colors[index])
             else:
-                frame = ctk.CTkFrame(tab, fg_color=theme.theme_stations)
+                frame = ctk.CTkFrame(tab, fg_color=theme.theme_tab)
 
             # Load and display image
             image = ctk.CTkImage(light_image=Image.open(images[index]), size=(50, 50))
