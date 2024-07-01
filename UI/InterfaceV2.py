@@ -173,7 +173,7 @@ class MetroAppUIV2(tk.Frame):
         # Set the node color to white
         nodes = nx.draw_networkx_nodes(undirected_graph, pos=pos, ax=ax, node_size=20, node_color='white')
 
-
+        fig.set_facecolor('#323232')
         # Create a FigureCanvasTkAgg object and attach it to the canvas_frame
         canvas = FigureCanvasTkAgg(fig, master=self.canvas_frame)
         canvas.draw()
@@ -292,6 +292,10 @@ class MetroAppUIV2(tk.Frame):
             self.current_frame = self.control_frame
             self.canvas_frame.pack(side="right", fill="both", expand=True)
             self.clear_travel()
+
+            for widget in self.canvas_frame.winfo_children():
+                widget.destroy()
+            self.display_graph()
 
     def nav_bar(self):
         self.nav_frame = ctk.CTkFrame(self.master, fg_color=theme.theme_background)
