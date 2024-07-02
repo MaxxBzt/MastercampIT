@@ -23,6 +23,7 @@ from Graph.shortestpath import dijkstra
 from unidecode import unidecode
 from calc import carbon_saved
 import mplcursors
+import darkdetect
 
 
 class MetroAppUIV2(tk.Frame):
@@ -80,17 +81,26 @@ class MetroAppUIV2(tk.Frame):
         fig, ax = plt.subplots(figsize=(20, 10))  # Adjust the size here
 
         # Set the background color to black
-        ax.set_facecolor('#323232')
+        # Check if user is in dark mode
+        if darkdetect.isDark():
+            ax.set_facecolor(theme.theme_background[1])
+        else:
+            ax.set_facecolor(theme.theme_background[0])
 
         # Adjust the subplot parameters to reduce the white border
         fig.subplots_adjust(left=0.07, right=0.93, top=0.93, bottom=0.07)
 
         # Draw only the nodes on the figure with smaller size, using the positions from the 'pos' dictionary
         # Set the node color to white
-        nodes = nx.draw_networkx_nodes(self.metro_graph, pos=pos, ax=ax, node_size=20, node_color='white')
+        if darkdetect.isDark():
+            nodes = nx.draw_networkx_nodes(self.metro_graph, pos=pos, ax=ax, node_size=20, node_color='white')
+        else:
+            nodes = nx.draw_networkx_nodes(self.metro_graph, pos=pos, ax=ax, node_size=20, node_color='black')
 
-
-        fig.set_facecolor('#323232')
+        if darkdetect.isDark():
+            fig.set_facecolor(theme.theme_background[1])
+        else:
+            fig.set_facecolor(theme.theme_background[0])
         # Create a FigureCanvasTkAgg object and attach it to the canvas_frame
         canvas = FigureCanvasTkAgg(fig, master=self.canvas_frame)
         canvas.draw()
@@ -105,6 +115,8 @@ class MetroAppUIV2(tk.Frame):
                 node_data = self.metro_graph.nodes[node_id]
                 #print(node_data)  # Print the entire node data
                 sel.annotation.set_text(node_data['name'])
+                # Change text color
+                sel.annotation.set_color('white')
                 sel.annotation.get_bbox_patch().set_facecolor('grey')  # Change the color here
                 sel.annotation.get_bbox_patch().set_alpha(1.0)  # Make the background fully opaque
                 sel.annotation.arrow_patch.set_color('red')
@@ -164,16 +176,26 @@ class MetroAppUIV2(tk.Frame):
         fig, ax = plt.subplots(figsize=(20, 10))  # Adjust the size here
 
         # Set the background color to black
-        ax.set_facecolor('#323232')
+        if darkdetect.isDark():
+            ax.set_facecolor(theme.theme_background[1])
+        else:
+            ax.set_facecolor(theme.theme_background[0])
 
         # Adjust the subplot parameters to reduce the white border
         fig.subplots_adjust(left=0.07, right=0.93, top=0.93, bottom=0.07)
 
         # Draw only the nodes on the figure with smaller size, using the positions from the 'pos' dictionary
         # Set the node color to white
-        nodes = nx.draw_networkx_nodes(undirected_graph, pos=pos, ax=ax, node_size=20, node_color='white')
+        if darkdetect.isDark():
+            nodes = nx.draw_networkx_nodes(undirected_graph, pos=pos, ax=ax, node_size=20, node_color='white')
+        else:
+            nodes = nx.draw_networkx_nodes(undirected_graph, pos=pos, ax=ax, node_size=20, node_color='black')
 
-        fig.set_facecolor('#323232')
+        if darkdetect.isDark():
+            fig.set_facecolor(theme.theme_background[1])
+        else:
+            fig.set_facecolor(theme.theme_background[0])
+
         # Create a FigureCanvasTkAgg object and attach it to the canvas_frame
         canvas = FigureCanvasTkAgg(fig, master=self.canvas_frame)
         canvas.draw()
