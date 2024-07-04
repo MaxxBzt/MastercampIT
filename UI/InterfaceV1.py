@@ -1157,20 +1157,22 @@ class MetroAppUIV1(tk.Frame):
             ]
             money_prices = [300, 800, 1500, 3500]
 
-            self.charity_images = ["assets/shop/croix_rouge.png", "assets/shop/secours_pop.png",
-                              "assets/shop/greenpeace-logo.jpg",
-                              "assets/shop/wwf.png"]
+            self.charity_images = [ "assets/shop/greenpeace-logo.jpg",
+                              "assets/shop/wwf.png",
+                                    "assets/shop/croix_rouge.png", "assets/shop/secours_pop.png",
+                             ]
             charity_titles = [
+                "Greenpeace",
+                "WWW France",
                 "Croix-Rouge française",
                 "Secours Populaire Français",
-                "Greenpeace",
-                "WWW France"
+
             ]
             charity_descriptions = [
-                "Association humanitaire française fondée en 1864, reconnue d'utilité publique. Elle agit sur le territoire français et à l'international pour secourir les personnes en difficulté.",
-                "Association à but non lucratif créée en 1945. Elle lutte contre la pauvreté et l'exclusion en France et dans le monde, en apportant une aide matérielle, sociale et morale aux personnes en difficulté.",
-                "Association qui agissent selon les principes de non-violence pour protéger l’environnement, la biodiversité et promouvoir la paix. Elle s’appuie sur un mouvement de citoyennes et citoyens engagé-e-s pour construire un monde durable et équitable",
-                "Association pour ârrêter la dégradation de l'environnement dans le monde et construire un avenir où les êtres humains pourront vivre en harmonie avec la nature."
+                "Association qui agissent selon les principes de non-violence pour protéger l’environnement, la biodiversité et promouvoir la paix. Elle s’appuie sur un mouvement de citoyennes.",
+                "Association pour ârrêter la dégradation de l'environnement dans le monde et construire un avenir où les êtres humains pourront vivre en harmonie avec la nature.",
+                "Association humanitaire française fondée en 1864, reconnue d'utilité publique. Elle agit sur le territoire français.",
+                "Association à but non lucratif créée en 1945. Elle lutte contre la pauvreté et l'exclusion en France et dans le monde..",
             ]
             charity_prices = [50, 50, 50, 50]
 
